@@ -1,3 +1,4 @@
+
 // bg.js – Partikel-Tunnel mit kugelförmigem Start & starker Strudel
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
