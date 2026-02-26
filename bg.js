@@ -1,105 +1,111 @@
-const canvas = document.getElementById("bgCanvas");
-const ctx = canvas.getContext("2d");
+// bg.js – Smooth Space Animation (Professional Version)
 
-let width, height;
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
 
-function resizeCanvas() {
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-}
-
-resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+let width = canvas.width = window.innerWidth;
+let height = canvas.height = window.innerHeight;
 
 const particles = [];
 const particleCount = 220;
 
-const center = {
-  x: () => width / 2,
-  y: () => height / 2
-};
+function random(min,max){return Math.random()*(max-min)+min;}
 
-function random(min, max) {
-  return Math.random() * (max - min) + min;
-}
+// Mittelpunkt dynamisch
+let center = { x: width/2, y: height/2 };
 
-function createParticles() {
+// Partikel erzeugen
+function createParticles(){
   particles.length = 0;
-  for (let i = 0; i < particleCount; i++) {
+  for(let i=0;i<particleCount;i++){
     particles.push({
-      x: random(0, width),
-      y: random(0, height),
-      vx: random(-0.15, 0.15),
-      vy: random(-0.15, 0.15),
-      radius: random(1, 2.5),
-      alpha: random(0.3, 0.9),
-      decay: random(0.0008, 0.002)
+      x: random(0,width),
+      y: random(0,height),
+      vx: random(-0.2,0.2), // langsamer
+      vy: random(-0.2,0.2),
+      radius: random(1,2.5),
+      alpha: random(0.5,1),
+      decay: random(0.0008,0.002), // langsamere Explosion
+      color: `rgba(255,${Math.floor(random(140,255))},0,`
     });
   }
 }
 
-createParticles();
+// Animation-Zustände
+let phase = 'float';
+let timer = 0;
 
-let phase = "float";
-let phaseTimer = 0;
+// Zeichnen
+function drawParticles(){
 
-function drawBackground() {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, width, height);
-}
+  // Tiefer schwarzer Hintergrund mit weichem Fade
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fillRect(0,0,width,height);
 
-function drawParticles() {
-  for (let p of particles) {
+  for(let p of particles){
 
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
+    ctx.fillStyle = p.color + p.alpha + ')';
 
-    ctx.fillStyle = `rgba(255,140,0,${p.alpha})`;
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = "rgba(255,120,0,0.8)";
+    // stärkerer Glow
+    ctx.shadowBlur = 25;
+    ctx.shadowColor = 'rgba(255,120,0,0.9)';
     ctx.fill();
 
-    if (phase === "float") {
+    // FLOAT (sanft)
+    if(phase==='float'){
       p.x += p.vx;
       p.y += p.vy;
 
-      if (p.x <= 0 || p.x >= width) p.vx *= -1;
-      if (p.y <= 0 || p.y >= height) p.vy *= -1;
+      if(p.x<0||p.x>width)p.vx*=-1;
+      if(p.y<0||p.y>height)p.vy*=-1;
+    }
 
-    } else if (phase === "gather") {
+    // GATHER (weicher Magnet-Effekt)
+    else if(phase==='gather'){
+      p.x += (center.x - p.x)*0.015;
+      p.y += (center.y - p.y)*0.015;
+    }
 
-      p.x += (center.x() - p.x) * 0.01;
-      p.y += (center.y() - p.y) * 0.01;
-
-    } else if (phase === "explode") {
-
-      p.x += p.vx * 1.5;
-      p.y += p.vy * 1.5;
+    // EXPLODE (langsam & episch)
+    else if(phase==='explode'){
+      p.x += p.vx*1.5;
+      p.y += p.vy*1.5;
       p.alpha -= p.decay;
 
-      if (p.alpha <= 0.1) {
-        p.x = center.x();
-        p.y = center.y();
-        p.alpha = random(0.5, 0.9);
+      if(p.alpha<=0.1){
+        p.x = center.x;
+        p.y = center.y;
+        p.alpha = random(0.6,1);
       }
     }
   }
 }
 
-function animate() {
-  drawBackground();
+// Animation Loop
+function animate(){
   drawParticles();
-
-  phaseTimer++;
-
-  if (phaseTimer === 600) phase = "gather";
-  if (phaseTimer === 900) phase = "explode";
-  if (phaseTimer === 1300) {
-    phase = "float";
-    phaseTimer = 0;
-  }
-
   requestAnimationFrame(animate);
+
+  timer++;
+
+  if(timer===600) phase='gather';     // sammeln
+  if(timer===1000) phase='explode';  // langsam explodieren
+  if(timer===1600){                  // zurück zu float
+    phase='float';
+    timer=0;
+  }
 }
 
+// Resize
+window.addEventListener('resize',()=>{
+  width=canvas.width=window.innerWidth;
+  height=canvas.height=window.innerHeight;
+  center.x=width/2;
+  center.y=height/2;
+});
+
+// Start
+createParticles();
 animate();
