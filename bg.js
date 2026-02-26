@@ -1,4 +1,4 @@
-// bg.js – Professionelle Universum-Animation mit Glow & Explosion
+// bg.js – Professionelles Universum: Schweben, Sammeln, Explodieren
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -10,7 +10,7 @@ const center = { x: width / 2, y: height / 2 };
 
 // Partikel
 const particles = [];
-const particleCount = 120; // weniger = realistisch, professionell
+const particleCount = 100; // realistisch
 
 function random(min, max) { return Math.random() * (max - min) + min; }
 
@@ -18,17 +18,45 @@ function random(min, max) { return Math.random() * (max - min) + min; }
 function createParticles() {
   particles.length = 0;
   for (let i = 0; i < particleCount; i++) {
-    const hue = random(40, 55); // warme Lichtfarbe
+    const hue = random(40, 60); // warme Lichtfarbe
     particles.push({
       x: random(0, width),
       y: random(0, height),
-      vx: random(-0.3, 0.3),
-      vy: random(-0.3, 0.3),
-      radius: random(1.5, 3),
+      vx: random(-0.2, 0.2),
+      vy: random(-0.2, 0.2),
+      radius: random(1.5, 3.5),
       alpha: random(0.5, 1),
       decay: random(0.001, 0.003),
-      color: `hsla(${hue},100%,70%,`
+      color: `hsla(${hue},100%,85%,`
     });
+  }
+}
+
+// Hintergrund + Sterne + Glow
+function drawBackground() {
+  // Schwarz + Motion Trails
+  ctx.fillStyle = 'rgba(0,0,0,0.05)';
+  ctx.fillRect(0, 0, width, height);
+
+  // Sterne
+  for (let i = 0; i < 5; i++) {
+    const sx = random(0, width), sy = random(0, height), sr = random(0.2, 1.2), sa = random(0.3, 0.7);
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(255,255,255,${sa})`;
+    ctx.fill();
+  }
+
+  // Sanfte Glow-Lichter
+  for (let i = 0; i < 3; i++) {
+    const lx = random(0, width), ly = random(0, height), lr = random(60, 140);
+    const grad = ctx.createRadialGradient(lx, ly, 0, lx, ly, lr);
+    grad.addColorStop(0, 'rgba(255,180,120,0.05)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(lx, ly, lr, 0, Math.PI * 2);
+    ctx.fill();
   }
 }
 
@@ -36,68 +64,52 @@ function createParticles() {
 let phase = 'float'; // float -> gather -> explode
 let timer = 0;
 
-// Hintergrund zeichnen
-function drawBackground() {
-  ctx.fillStyle = '#000'; // komplett schwarz
-  ctx.fillRect(0, 0, width, height);
-}
-
 // Partikel zeichnen & bewegen
 function drawParticles() {
   drawBackground();
 
-  // kleine Sterne für Universum-Tiefe
-  for(let i=0; i<5; i++){
-    const sx = random(0, width);
-    const sy = random(0, height);
-    const sr = random(0.2, 1.2);
-    const sa = random(0.2, 0.6);
-    ctx.beginPath();
-    ctx.arc(sx, sy, sr, 0, Math.PI*2);
-    ctx.fillStyle = `rgba(255,255,255,${sa})`;
-    ctx.fill();
-  }
-
   for (let p of particles) {
     ctx.beginPath();
-    ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
     ctx.fillStyle = p.color + p.alpha + ')';
-    ctx.shadowBlur = 15 + 10 * p.alpha;
-    ctx.shadowColor = 'hsla(45,100%,80%,' + p.alpha + ')';
+    ctx.shadowBlur = 15 + 15 * p.alpha;
+    ctx.shadowColor = 'hsla(45,100%,90%,' + p.alpha + ')';
     ctx.fill();
 
-    if(phase === 'float'){
+    // Phase-bezogen
+    if (phase === 'float') {
       p.vx += random(-0.01, 0.01);
       p.vy += random(-0.01, 0.01);
       p.x += p.vx;
       p.y += p.vy;
-    } 
-    else if(phase === 'gather'){
-      p.x += (center.x - p.x) * 0.04;
-      p.y += (center.y - p.y) * 0.04;
-      p.alpha = Math.min(p.alpha + 0.015,1);
-    } 
-    else if(phase === 'explode'){
+
+      // Begrenzung
+      if (p.x < 0 || p.x > width) p.vx *= -1;
+      if (p.y < 0 || p.y > height) p.vy *= -1;
+    }
+    else if (phase === 'gather') {
+      p.x += (center.x - p.x) * 0.03;
+      p.y += (center.y - p.y) * 0.03;
+      p.alpha = Math.min(p.alpha + 0.02, 1);
+    }
+    else if (phase === 'explode') {
       const angle = Math.atan2(p.y - center.y, p.x - center.x);
-      const speed = random(2,4);
-      p.x += Math.cos(angle) * speed + random(-0.5,0.5);
-      p.y += Math.sin(angle) * speed + random(-0.5,0.5);
+      const speed = random(2, 4);
+      p.x += Math.cos(angle) * speed + random(-0.5, 0.5);
+      p.y += Math.sin(angle) * speed + random(-0.5, 0.5);
       p.alpha -= p.decay * 2;
 
-      if(p.alpha <= 0){
-        const a = random(0, Math.PI*2);
-        const r = random(width/3, width/2);
-        p.x = center.x + Math.cos(a)*r;
-        p.y = center.y + Math.sin(a)*r;
-        p.alpha = random(0.5,1);
-        p.radius = random(1.5,3);
+      // Reset Partikel
+      if (p.alpha <= 0) {
+        const a = random(0, Math.PI * 2);
+        const r = random(width / 3, width / 2);
+        p.x = center.x + Math.cos(a) * r;
+        p.y = center.y + Math.sin(a) * r;
+        p.alpha = random(0.5, 1);
+        p.radius = random(1.5, 3.5);
+        p.vx = random(-0.2, 0.2);
+        p.vy = random(-0.2, 0.2);
       }
-    }
-
-    // Float Begrenzung
-    if(phase === 'float'){
-      if(p.x < 0 || p.x > width) p.vx *= -1;
-      if(p.y < 0 || p.y > height) p.vy *= -1;
     }
   }
 }
@@ -108,10 +120,9 @@ function animate() {
   requestAnimationFrame(animate);
   timer++;
 
-  // Phasensteuerung für smooth Effekt
-  if(timer % 1200 === 0) phase = 'gather';    // sammeln zur Mitte
-  if(timer % 1200 === 400) phase = 'explode'; // explodieren
-  if(timer % 1200 === 800) phase = 'float';   // schweben
+  if (timer % 1200 === 0) phase = 'gather';
+  if (timer % 1200 === 400) phase = 'explode';
+  if (timer % 1200 === 800) phase = 'float';
 }
 
 // Resize
@@ -124,4 +135,4 @@ window.addEventListener('resize', () => {
 
 // Start
 createParticles();
-animate(); 
+animate();
