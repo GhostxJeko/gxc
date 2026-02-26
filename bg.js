@@ -1,3 +1,4 @@
+
 // bg.js – Realistische Partikel im Universum, zusammenziehend & explodierend
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
