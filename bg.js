@@ -1,4 +1,4 @@
-// bg.js – Weiß/Blau Universum mit starkem Strudel (performant & flüssig)
+// bg.js – Weiß/Blau starker natürlicher Strudel (kein Kreis, kein Reset)
 
 const canvas = document.getElementById("bgCanvas");
 const ctx = canvas.getContext("2d");
@@ -10,8 +10,8 @@ let centerX = width / 2;
 let centerY = height / 2;
 
 const particles = [];
-const START_COUNT = 60;   // Anfang wenig Partikel
-const MAX_COUNT = 160;    // Im Strudel mehr Partikel
+const START_COUNT = 90;     // Mehr sichtbar am Anfang
+const MAX_COUNT = 200;      // Viele im Strudel
 
 function rand(min, max) {
   return Math.random() * (max - min) + min;
@@ -22,17 +22,16 @@ function createParticles() {
 
   for (let i = 0; i < MAX_COUNT; i++) {
 
-    // NUR Weiß & Blau
-    const hueOptions = [210, 220, 230, 240];
+    const hueOptions = [210, 220, 230, 240]; // nur blau/weiß
     const hue = hueOptions[Math.floor(rand(0, hueOptions.length))];
 
     particles.push({
       x: rand(0, width),
       y: rand(0, height),
-      vx: rand(-0.15, 0.15),
-      vy: rand(-0.15, 0.15),
+      vx: rand(-0.2, 0.2),
+      vy: rand(-0.2, 0.2),
       radius: rand(1.2, 2.4),
-      alpha: i < START_COUNT ? rand(0.6, 1) : 0,
+      alpha: i < START_COUNT ? rand(0.7, 1) : 0,
       active: i < START_COUNT,
       hue: hue
     });
@@ -66,13 +65,12 @@ function drawParticles() {
 
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${p.alpha})`;
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = `hsla(${p.hue}, 90%, 75%, ${p.alpha})`;
+    ctx.fillStyle = `hsla(${p.hue}, 95%, 75%, ${p.alpha})`;
+    ctx.shadowBlur = 22;
+    ctx.shadowColor = `hsla(${p.hue}, 95%, 75%, ${p.alpha})`;
     ctx.fill();
 
     if (phase === "float") {
-
       p.x += p.vx;
       p.y += p.vy;
 
@@ -81,7 +79,6 @@ function drawParticles() {
     }
 
     if (phase === "gather") {
-
       p.x += (centerX - p.x) * 0.05;
       p.y += (centerY - p.y) * 0.05;
     }
@@ -93,18 +90,20 @@ function drawParticles() {
 
       const angle = Math.atan2(dy, dx);
 
-      const swirlStrength = 0.18;   // Stark aber stabil
-      const outwardForce = 1.5;     // Partikel fliegen raus
+      // Stärkerer Spiralimpuls
+      const swirlStrength = 0.28;
+      const outwardDrift = 1.8;
 
-      p.x += Math.cos(angle + swirlStrength) * outwardForce;
-      p.y += Math.sin(angle + swirlStrength) * outwardForce;
+      p.x += Math.cos(angle + swirlStrength) * outwardDrift;
+      p.y += Math.sin(angle + swirlStrength) * outwardDrift;
 
-      p.alpha -= 0.002;
+      // Natürliches Ausblenden wenn draußen
+      if (p.x < -100 || p.x > width + 100 ||
+          p.y < -100 || p.y > height + 100) {
 
-      if (p.alpha <= 0) {
-        p.x = centerX;
-        p.y = centerY;
-        p.alpha = rand(0.6, 1);
+        // Neustart zufällig irgendwo – NICHT in der Mitte
+        p.x = rand(0, width);
+        p.y = rand(0, height);
       }
     }
 
@@ -115,9 +114,7 @@ function activateMoreParticles() {
   particles.forEach(p => {
     if (!p.active) {
       p.active = true;
-      p.x = centerX;
-      p.y = centerY;
-      p.alpha = rand(0.6, 1);
+      p.alpha = rand(0.7, 1);
     }
   });
 }
@@ -129,18 +126,18 @@ function animate() {
 
   timer++;
 
-  if (timer === 400) phase = "gather";
+  if (timer === 350) phase = "gather";
 
-  if (timer === 650) {
-    activateMoreParticles();  // Mehr Partikel erst im Strudel
+  if (timer === 600) {
+    activateMoreParticles();
     phase = "swirl";
   }
 
-  if (timer === 1400) {
+  if (timer === 1700) {
     phase = "float";
     timer = 0;
   }
 }
 
 createParticles();
-animate(); 
+animate();
