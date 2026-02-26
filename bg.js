@@ -15,10 +15,10 @@ function createParticles() {
   particles.length = 0;
   for (let i = 0; i < particleCount; i++) {
     // Nur Weiß & Blau
-    const hues = [210, 220, 230, 240]; // reine Blautöne
+    const hues = [210, 220, 230, 240]; // Blautöne
     const hue = hues[Math.floor(random(0, hues.length))];
     const sat = random(60, 100);
-    const light = random(80, 100); // hell = weiß-blau
+    const light = random(80, 100); // hell = Weiß-Blau
     particles.push({
       x: random(0, width),
       y: random(0, height),
@@ -76,10 +76,9 @@ function drawParticles() {
     } else if (phase === 'explode') {
       // Strudelartige Explosion
       const angle = Math.atan2(p.y - center.y, p.x - center.x);
-      const swirl = 0.05; // Rotation um die Mitte
       const speed = random(1.5, 3);
-      p.x += Math.cos(angle + swirl) * speed + random(-0.2, 0.2);
-      p.y += Math.sin(angle + swirl) * speed + random(-0.2, 0.2);
+      p.x += Math.cos(angle) * speed + random(-0.3, 0.3);
+      p.y += Math.sin(angle) * speed + random(-0.3, 0.3);
       p.alpha -= p.decay * 1.5;
 
       if (p.alpha <= 0) {
@@ -91,7 +90,7 @@ function drawParticles() {
         p.radius = random(1.5, 3);
 
         // Neue Farbe: Weiß bis Blau
-        const hues = [210, 220, 230, 240]; // reine Blautöne
+        const hues = [210, 220, 230, 240];
         const hue = hues[Math.floor(random(0, hues.length))];
         const sat = random(60, 100);
         const light = random(80, 100);
@@ -124,4 +123,4 @@ window.addEventListener('resize', () => {
 });
 
 createParticles();
-animate();  
+animate();
