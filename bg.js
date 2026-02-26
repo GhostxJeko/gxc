@@ -129,4 +129,4 @@ function animate() {
 
 // Start
 createParticles();
-animate();
+animate();  
