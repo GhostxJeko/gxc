@@ -1,3 +1,4 @@
+
 // bg.js – Professioneller Partikel-Tunnel mit Glow & Explosion
 
 const canvas = document.getElementById('bgCanvas');
