@@ -1,3 +1,4 @@
+
 // bg.js – Weiß/Blau Universum mit starkem Strudel (performant & flüssig)
 
 const canvas = document.getElementById("bgCanvas");
