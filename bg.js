@@ -1,4 +1,4 @@
-// bg.js – verbesserte Partikel & Bitcoin-Effekt
+// bg.js – Partikel über Live-Bitcoin mit Bitcoin-Logo Effekt
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -8,7 +8,11 @@ let height = canvas.height = window.innerHeight;
 const particles = [];
 const particleCount = 150;
 
-// Bitcoin-Logo Position (Mitte oben)
+// Position über der Live-Bitcoin-Zahl
+const btcBox = document.getElementById('btc-box');
+let btcX = width / 2;
+let btcY = height / 3;
+
 const btcLogo = [
   {x:0,y:-2},{x:1,y:-2},{x:-1,y:-2},{x:0,y:-1},{x:1,y:-1},{x:-1,y:-1},
   {x:0,y:0},{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:1,y:1},{x:-1,y:1},
@@ -17,17 +21,17 @@ const btcLogo = [
 
 function random(min,max){return Math.random()*(max-min)+min;}
 
-// Erstelle Partikel
+// Partikel erstellen
 function createParticles() {
   for(let i=0;i<particleCount;i++){
     particles.push({
-      x: random(0,width),
-      y: random(0,height),
+      x: btcX + random(-200,200),
+      y: btcY + random(-100,100),
       vx: random(-0.5,0.5),
       vy: random(-0.5,0.5),
       radius: random(1,3),
       color: `rgba(255,${Math.floor(random(127,255))},0,${random(0.5,1)})`,
-      target:null
+      target: null
     });
   }
 }
@@ -52,26 +56,28 @@ function drawParticles() {
       p.y += p.vy;
     }
 
+    // Grenzen
     if(p.x<0||p.x>width)p.vx*=-1;
     if(p.y<0||p.y>height)p.vy*=-1;
   }
 }
 
-// Partikel bilden Bitcoin-Logo
+// Bitcoin-Logo formen
 function formBitcoin() {
-  const centerX = width/2;
-  const centerY = height/3; // oben
+  btcX = btcBox.offsetLeft + btcBox.offsetWidth/2;
+  btcY = btcBox.offsetTop + btcBox.offsetHeight/2;
+
   for(let i=0;i<btcLogo.length;i++){
     if(particles[i]){
       particles[i].target = {
-        x:centerX + btcLogo[i].x*20,
-        y:centerY + btcLogo[i].y*20
+        x: btcX + btcLogo[i].x*20,
+        y: btcY + btcLogo[i].y*20
       };
     }
   }
 }
 
-// Rückkehr zum freien Flug
+// Zurück zu normalem Flug
 function resetParticles() {
   for(let p of particles){
     p.target = null;
@@ -90,16 +96,17 @@ window.addEventListener('resize',()=>{
   height=canvas.height=window.innerHeight;
 });
 
+// Partikel initialisieren und Animation starten
 createParticles();
 animate();
 
-// Bitcoin-Logo alle 8 Sekunden
+// Alle 8 Sekunden Bitcoin-Logo für 4 Sekunden
 setInterval(()=>{
   formBitcoin();
   setTimeout(resetParticles,4000);
 },8000);
 
-// Optional: Glow / Puls für Live-Bitcoin
+// Glow-Puls für Live-Bitcoin
 const btcPriceEl = document.getElementById('btc-price');
 if(btcPriceEl){
   let pulse = 0;
