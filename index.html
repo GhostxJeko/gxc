@@ -16,13 +16,12 @@
       <h1>Ghost-X Crypto Society</h1>
       <p>Unlock secret crypto strategies, market insights, and insider knowledge. Join the elite, where only the curious thrive.</p>
     </header>
-    <div id="btc-box" style="margin-top:40px; text-align:center;">
-  <h2 style="color:white;">Live Bitcoin Preis</h2>
-  <div id="btc-price" style="font-size:2.5rem; font-weight:bold; color:#F7931A;">
-    Lade...
+<div id="btc-box" style="margin-top:20px; text-align:center;">
+  <h2 style="color:white; font-size:1.8rem;">Live Bitcoin Price</h2>
+  <div id="btc-price" style="font-size:1.5rem; font-weight:bold; color:#F7931A;">
+    Loading...
   </div>
 </div>
-
     <section class="features">
       <div class="feature">
         <h2>Exclusive Analysis</h2>
@@ -46,11 +45,6 @@
       <p>&copy; 2026 Ghost-X Community. All rights reserved.</p>
     </footer>
   </div>
-
-  <!-- Background Animation Script -->
-  <script src="bg.js"></script>
-</body>
-  <!-- Live Bitcoin Preis Script -->
 <script>
 let lastPrice = null;
 
@@ -76,11 +70,12 @@ async function updateBTC() {
     lastPrice = price;
 
   } catch (error) {
-    document.getElementById("btc-price").innerHTML = "Fehler beim Laden";
+    document.getElementById("btc-price").innerHTML = "Error loading price";
   }
 }
 
 updateBTC();
 setInterval(updateBTC, 15000);
 </script>
+</body>
 </html>
