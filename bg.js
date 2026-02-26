@@ -1,142 +1,131 @@
-// bg.js – Weiß/Blau Universum mit starkem Strudel (performant & flüssig)
+// bg.js – Partikel-Tunnel mit Strudel-Explosion (weiß & blau)
 
-const canvas = document.getElementById("bgCanvas");
-const ctx = canvas.getContext("2d");
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
 
 let width = canvas.width = window.innerWidth;
 let height = canvas.height = window.innerHeight;
-
-let centerX = width / 2;
-let centerY = height / 2;
+const center = { x: width / 2, y: height / 2 };
 
 const particles = [];
-const START_COUNT = 60;   // Anfang wenige Partikel
-const MAX_COUNT = 160;    // Im Strudel mehr Partikel
+const particleCount = 200;
 
-// Zufallsfunktion
-function rand(min, max) {
+function random(min, max) {
     return Math.random() * (max - min) + min;
 }
 
-// Partikel erzeugen – nur Weiß & Blau
 function createParticles() {
     particles.length = 0;
-    for (let i = 0; i < MAX_COUNT; i++) {
-        const hueOptions = [210, 220, 230, 240];
-        const hue = hueOptions[Math.floor(rand(0, hueOptions.length))];
+    for (let i = 0; i < particleCount; i++) {
+        // Farbtöne für Explosion: Weiß bis Blau
+        const hues = [210, 240, 270]; // Blau-Nuancen
+        const hue = hues[Math.floor(random(0, hues.length))];
+        const sat = random(50, 100);
+        const light = random(70, 100);
 
         particles.push({
-            x: rand(0, width),
-            y: rand(0, height),
-            vx: rand(-0.15, 0.15),
-            vy: rand(-0.15, 0.15),
-            radius: rand(1.2, 2.4),
-            alpha: i < START_COUNT ? rand(0.6, 1) : 0,
-            active: i < START_COUNT,
-            hue: hue
+            x: random(0, width),
+            y: random(0, height),
+            vx: random(-0.2, 0.2),
+            vy: random(-0.2, 0.2),
+            radius: random(1.5, 3),
+            alpha: random(0.5, 1),
+            decay: random(0.001, 0.003),
+            color: `hsla(${hue},${sat}%,${light}%,`
         });
     }
 }
 
-// Resize
-function resize() {
-    width = canvas.width = window.innerWidth;
-    height = canvas.height = window.innerHeight;
-    centerX = width / 2;
-    centerY = height / 2;
-}
-window.addEventListener("resize", resize);
+let phase = 'float';
+let timer = 0;
 
-// Hintergrund zeichnen
 function drawBackground() {
-    ctx.fillStyle = "black";
+    ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, width, height);
 }
 
-// Partikel zeichnen & bewegen
 function drawParticles() {
     drawBackground();
 
-    particles.forEach(p => {
-        if (!p.active) return;
+    // Hintergrund-Sterne
+    for (let i = 0; i < 6; i++) {
+        const sx = random(0, width);
+        const sy = random(0, height);
+        const sr = random(0.3, 1.2);
+        const sa = random(0.2, 0.5);
+        ctx.beginPath();
+        ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${sa})`;
+        ctx.fill();
+    }
 
+    for (let p of particles) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${p.alpha})`;
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = `hsla(${p.hue}, 90%, 75%, ${p.alpha})`;
+        ctx.fillStyle = p.color + p.alpha + ')';
+        ctx.shadowBlur = 15 + 10 * p.alpha;
+        ctx.shadowColor = 'rgba(255,255,255,' + p.alpha + ')';
         ctx.fill();
 
-        if (phase === "float") {
-            // Sanftes Schweben, kleine Anziehung zur Mitte
-            p.x += p.vx + (centerX - p.x) * 0.001;
-            p.y += p.vy + (centerY - p.y) * 0.001;
+        if (phase === 'float') {
+            p.vx += random(-0.008, 0.008);
+            p.vy += random(-0.008, 0.008);
+            p.x += p.vx;
+            p.y += p.vy;
+        } else if (phase === 'gather') {
+            // Partikel werden zur Mitte gezogen
+            p.x += (center.x - p.x) * 0.03;
+            p.y += (center.y - p.y) * 0.03;
+            p.alpha = Math.min(p.alpha + 0.01, 1);
+        } else if (phase === 'explode') {
+            // Strudelartige Explosion
+            const angle = Math.atan2(p.y - center.y, p.x - center.x);
+            const swirl = 0.05; // Rotation um die Mitte
+            const speed = random(1.5, 3);
+            p.x += Math.cos(angle + swirl) * speed + random(-0.2, 0.2);
+            p.y += Math.sin(angle + swirl) * speed + random(-0.2, 0.2);
+            p.alpha -= p.decay * 1.5;
 
+            if (p.alpha <= 0) {
+                const a = random(0, Math.PI * 2);
+                const r = random(width / 3, width / 2);
+                p.x = center.x + Math.cos(a) * r;
+                p.y = center.y + Math.sin(a) * r;
+                p.alpha = random(0.5, 1);
+                p.radius = random(1.5, 3);
+
+                // Neue Farbe: Weiß bis Blau
+                const hues = [210, 240, 270];
+                const hue = hues[Math.floor(random(0, hues.length))];
+                const sat = random(50, 100);
+                const light = random(70, 100);
+                p.color = `hsla(${hue},${sat}%,${light}%,`;
+            }
+        }
+
+        if (phase === 'float') {
             if (p.x < 0 || p.x > width) p.vx *= -1;
             if (p.y < 0 || p.y > height) p.vy *= -1;
         }
-
-        if (phase === "gather") {
-            // Partikel werden stärker zur Mitte gezogen
-            p.x += (centerX - p.x) * 0.05;
-            p.y += (centerY - p.y) * 0.05;
-        }
-
-        if (phase === "swirl") {
-            // Starker Strudel / Spiralbewegung
-            const dx = p.x - centerX;
-            const dy = p.y - centerY;
-            const angle = Math.atan2(dy, dx);
-            const swirlStrength = 0.18;  // Stark aber stabil
-            const outwardForce = 1.5;    // Partikel fliegen raus
-
-            p.x += Math.cos(angle + swirlStrength) * outwardForce;
-            p.y += Math.sin(angle + swirlStrength) * outwardForce;
-
-            p.alpha -= 0.002;
-
-            if (p.alpha <= 0) {
-                p.x = centerX;
-                p.y = centerY;
-                p.alpha = rand(0.6, 1);
-            }
-        }
-    });
+    }
 }
 
-// Aktiviert die restlichen Partikel beim Strudel
-function activateMoreParticles() {
-    particles.forEach(p => {
-        if (!p.active) {
-            p.active = true;
-            p.x = centerX;
-            p.y = centerY;
-            p.alpha = rand(0.6, 1);
-        }
-    });
-}
-
-let phase = "float";
-let timer = 0;
-
-// Animation
 function animate() {
     drawParticles();
     requestAnimationFrame(animate);
-
     timer++;
 
-    if (timer === 400) phase = "gather";
-    if (timer === 650) {
-        activateMoreParticles(); // Mehr Partikel erst im Strudel
-        phase = "swirl";
-    }
-    if (timer === 1400) {
-        phase = "float";
-        timer = 0;
-    }
+    if (timer % 1500 === 0) phase = 'gather';
+    if (timer % 1500 === 500) phase = 'explode';
+    if (timer % 1500 === 1000) phase = 'float';
 }
 
-// Start
+window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    center.x = width / 2;
+    center.y = height / 2;
+});
+
 createParticles();
 animate();
