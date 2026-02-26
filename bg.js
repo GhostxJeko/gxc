@@ -103,4 +103,4 @@ setInterval(()=>{
 }, 200);  
   
 createParticles();  
-animate();
+animate(); 
