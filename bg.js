@@ -1,4 +1,3 @@
-
 // bg.js – Starker Partikel-Strudel mit blau/weiß
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
