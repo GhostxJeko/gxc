@@ -50,4 +50,37 @@
   <!-- Background Animation Script -->
   <script src="bg.js"></script>
 </body>
+  <!-- Live Bitcoin Preis Script -->
+<script>
+let lastPrice = null;
+
+async function updateBTC() {
+  try {
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur"
+    );
+    const data = await response.json();
+    const price = data.bitcoin.eur;
+
+    const priceElement = document.getElementById("btc-price");
+
+    if (lastPrice !== null) {
+      if (price > lastPrice) {
+        priceElement.style.color = "lime";
+      } else if (price < lastPrice) {
+        priceElement.style.color = "red";
+      }
+    }
+
+    priceElement.innerHTML = "€ " + price.toLocaleString();
+    lastPrice = price;
+
+  } catch (error) {
+    document.getElementById("btc-price").innerHTML = "Fehler beim Laden";
+  }
+}
+
+updateBTC();
+setInterval(updateBTC, 15000);
+</script>
 </html>
