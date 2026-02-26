@@ -1,5 +1,4 @@
-
-// bg.js – Partikel-Tunnel mit Strudel-Explosion (weiß & blau)
+// bg.js – Ultra-smooth Partikel-Tunnel mit Strudel & Explosion (weiß & blau)
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -15,11 +14,10 @@ function random(min, max) { return Math.random() * (max - min) + min; }
 function createParticles() {
   particles.length = 0;
   for (let i = 0; i < particleCount; i++) {
-    // Nur Weiß & Blau
-    const hues = [210, 220, 230, 240]; // Blautöne
+    const hues = [210, 220, 230, 240]; // Weiß-Blau
     const hue = hues[Math.floor(random(0, hues.length))];
     const sat = random(60, 100);
-    const light = random(80, 100); // hell = Weiß-Blau
+    const light = random(80, 100);
     particles.push({
       x: random(0, width),
       y: random(0, height),
@@ -35,52 +33,40 @@ function createParticles() {
 
 let phase = 'float';
 let timer = 0;
+let lastTime = performance.now();
 
 function drawBackground() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, width, height);
 }
 
-function drawParticles() {
+function drawParticles(delta) {
   drawBackground();
-
-  // Hintergrund-Sterne
-  for (let i = 0; i < 6; i++) {
-    const sx = random(0, width);
-    const sy = random(0, height);
-    const sr = random(0.3, 1.2);
-    const sa = random(0.2, 0.5);
-    ctx.beginPath();
-    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${sa})`;
-    ctx.fill();
-  }
 
   for (let p of particles) {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
     ctx.fillStyle = p.color + p.alpha + ')';
-    ctx.shadowBlur = 15 + 10 * p.alpha;
+    ctx.shadowBlur = 15 * Math.min(p.alpha, 1); // weniger Glow, stabil
     ctx.shadowColor = 'rgba(255,255,255,' + p.alpha + ')';
     ctx.fill();
 
     if (phase === 'float') {
-      p.vx += random(-0.008, 0.008);
-      p.vy += random(-0.008, 0.008);
-      p.x += p.vx;
-      p.y += p.vy;
+      p.vx += random(-0.008, 0.008) * delta;
+      p.vy += random(-0.008, 0.008) * delta;
+      p.x += p.vx * delta;
+      p.y += p.vy * delta;
     } else if (phase === 'gather') {
-      // Partikel werden zur Mitte gezogen
-      p.x += (center.x - p.x) * 0.03;
-      p.y += (center.y - p.y) * 0.03;
-      p.alpha = Math.min(p.alpha + 0.01, 1);
+      p.x += (center.x - p.x) * 0.03 * delta;
+      p.y += (center.y - p.y) * 0.03 * delta;
+      p.alpha = Math.min(p.alpha + 0.01 * delta, 1);
     } else if (phase === 'explode') {
-      // Strudelartige Explosion
       const angle = Math.atan2(p.y - center.y, p.x - center.x);
-      const speed = random(1.5, 3);
-      p.x += Math.cos(angle) * speed + random(-0.3, 0.3);
-      p.y += Math.sin(angle) * speed + random(-0.3, 0.3);
-      p.alpha -= p.decay * 1.5;
+      const speed = random(1.5, 3) * delta;
+      const swirl = 0.05 * delta;
+      p.x += Math.cos(angle + swirl) * speed + random(-0.2, 0.2) * delta;
+      p.y += Math.sin(angle + swirl) * speed + random(-0.2, 0.2) * delta;
+      p.alpha -= p.decay * 1.5 * delta;
 
       if (p.alpha <= 0) {
         const a = random(0, Math.PI * 2);
@@ -90,7 +76,6 @@ function drawParticles() {
         p.alpha = random(0.5, 1);
         p.radius = random(1.5, 3);
 
-        // Neue Farbe: Weiß bis Blau
         const hues = [210, 220, 230, 240];
         const hue = hues[Math.floor(random(0, hues.length))];
         const sat = random(60, 100);
@@ -106,14 +91,17 @@ function drawParticles() {
   }
 }
 
-function animate() {
-  drawParticles();
-  requestAnimationFrame(animate);
-  timer++;
+function animate(now = performance.now()) {
+  const delta = (now - lastTime) / 16.666; // ca. 60fps Referenz
+  lastTime = now;
 
-  if (timer % 1500 === 0) phase = 'gather';
-  if (timer % 1500 === 500) phase = 'explode';
-  if (timer % 1500 === 1000) phase = 'float';
+  drawParticles(delta);
+  requestAnimationFrame(animate);
+
+  timer += delta;
+  if (timer >= 1500) { phase = 'gather'; timer = 0; }
+  if (timer >= 500 && phase !== 'explode') phase = 'explode';
+  if (timer >= 1000 && phase !== 'float') phase = 'float';
 }
 
 window.addEventListener('resize', () => {
@@ -124,4 +112,4 @@ window.addEventListener('resize', () => {
 });
 
 createParticles();
-animate();  
+animate();
