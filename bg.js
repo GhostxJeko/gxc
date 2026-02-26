@@ -1,3 +1,4 @@
+
 // bg.js – Kosmischer Lichtball mit Explosion & Strudel
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
