@@ -1,3 +1,4 @@
+
 // bg.js – Partikel-Tunnel mit Strudel-Explosion (weiß & blau)
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
