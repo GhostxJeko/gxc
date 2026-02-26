@@ -1,3 +1,4 @@
+
 // bg.js – Professionelle Partikelanimation im Universum
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
