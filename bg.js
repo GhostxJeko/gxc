@@ -1,4 +1,4 @@
-// bg.js – Partikel-Tunnel mit starkem Strudel & Explosion (weiß/blau -> bunt)
+// bg.js – Starker Partikel-Strudel mit blau/weiß
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -7,17 +7,15 @@ let height = canvas.height = window.innerHeight;
 const center = { x: width / 2, y: height / 2 };
 
 const particles = [];
-const initialParticleCount = 60; // Anfang wenige Partikel
-const totalParticleCount = 200;  // Mehr Partikel während Strudel/Explosion
+const particleCount = 100; // Anfangs wenige Partikel
 
 function random(min, max) { return Math.random() * (max - min) + min; }
 
 function createParticles() {
   particles.length = 0;
-  for (let i = 0; i < totalParticleCount; i++) {
-    // Start nur für die ersten Partikel: Weiß & Blau
-    const startHues = [210, 240]; 
-    const hue = i < initialParticleCount ? startHues[Math.floor(random(0, startHues.length))] : 210;
+  for (let i = 0; i < particleCount; i++) {
+    const hues = [210, 240]; // Blau-Nuancen
+    const hue = hues[Math.floor(random(0, hues.length))];
     const sat = random(60, 100);
     const light = random(70, 100);
     particles.push({
@@ -26,7 +24,7 @@ function createParticles() {
       vx: random(-0.1, 0.1),
       vy: random(-0.1, 0.1),
       radius: random(1.5, 2.5),
-      alpha: i < initialParticleCount ? random(0.5, 1) : 0, // andere Partikel starten unsichtbar
+      alpha: random(0.5, 1),
       decay: random(0.001, 0.003),
       color: `hsla(${hue},${sat}%,${light}%,`
     });
@@ -44,8 +42,8 @@ function drawBackground() {
 function drawParticles() {
   drawBackground();
 
-  // Kleine Sterne im Hintergrund
-  for (let i = 0; i < 5; i++) {
+  // Hintergrund-Sterne
+  for (let i = 0; i < 6; i++) {
     const sx = random(0, width);
     const sy = random(0, height);
     const sr = random(0.3, 1.2);
@@ -57,8 +55,6 @@ function drawParticles() {
   }
 
   for (let p of particles) {
-    if (p.alpha <= 0) continue; // unsichtbare Partikel überspringen
-
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
     ctx.fillStyle = p.color + p.alpha + ')';
@@ -67,45 +63,47 @@ function drawParticles() {
     ctx.fill();
 
     if (phase === 'float') {
-      // sanft schweben
       p.vx += random(-0.008, 0.008);
       p.vy += random(-0.008, 0.008);
       p.x += p.vx;
       p.y += p.vy;
+
     } else if (phase === 'gather') {
-      // zur Mitte ziehen
+      // Partikel zur Mitte ziehen
       p.x += (center.x - p.x) * 0.04;
       p.y += (center.y - p.y) * 0.04;
       p.alpha = Math.min(p.alpha + 0.01, 1);
+
     } else if (phase === 'explode') {
       // STARKER STRUDEL
       const dx = p.x - center.x;
       const dy = p.y - center.y;
       const angle = Math.atan2(dy, dx);
-      const swirl = 0.35; // deutlich stärkerer Strudel
-      const speed = random(2, 4);
-      p.x += Math.cos(angle + swirl) * speed + random(-0.3, 0.3);
-      p.y += Math.sin(angle + swirl) * speed + random(-0.3, 0.3);
-      p.alpha -= p.decay * 1.5;
+      const swirl = Math.PI / 30; // moderate Spiralbewegung
+      const speed = random(2, 3.5);
+      // Spiralbewegung + leichtes Herausdrehen
+      p.x += Math.cos(angle + swirl) * speed + Math.cos(angle) * 0.5;
+      p.y += Math.sin(angle + swirl) * speed + Math.sin(angle) * 0.5;
+      p.alpha -= p.decay * 1.2;
 
       if (p.alpha <= 0) {
         const a = random(0, Math.PI * 2);
         const r = random(width / 3, width / 2);
         p.x = center.x + Math.cos(a) * r;
         p.y = center.y + Math.sin(a) * r;
-        p.alpha = random(0.5, 1);
+        p.alpha = random(0.6, 1);
         p.radius = random(1.5, 3);
 
-        // Jetzt bunte Farben erst im Strudel
-        const explosionHues = [0, 45, 60, 210, 240]; // rot, gelb, weiß, blau
-        const hue = explosionHues[Math.floor(random(0, explosionHues.length))];
+        // Farben für Strudel immer blau/weiß
+        const hues = [210, 240];
+        const hue = hues[Math.floor(random(0, hues.length))];
         const sat = random(60, 100);
         const light = random(70, 100);
         p.color = `hsla(${hue},${sat}%,${light}%,`;
       }
     }
 
-    // Begrenzung Float-Bereich
+    // Float-Begrenzung
     if (phase === 'float') {
       if (p.x < 0 || p.x > width) p.vx *= -1;
       if (p.y < 0 || p.y > height) p.vy *= -1;
@@ -118,9 +116,9 @@ function animate() {
   requestAnimationFrame(animate);
   timer++;
 
-  if (timer % 2000 === 0) phase = 'gather';
-  if (timer % 2000 === 800) phase = 'explode';
-  if (timer % 2000 === 1600) phase = 'float';
+  if (timer % 1800 === 0) phase = 'gather';
+  if (timer % 1800 === 600) phase = 'explode';
+  if (timer % 1800 === 1200) phase = 'float';
 }
 
 window.addEventListener('resize', () => {
