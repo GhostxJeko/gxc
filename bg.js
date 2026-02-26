@@ -1,3 +1,4 @@
+
 // bg.js – Universum: Lichtkugel, Strudel & Explosion (weiß/blau, performant)
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
