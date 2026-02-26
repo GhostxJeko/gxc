@@ -1,6 +1,6 @@
 <!-- Live Bitcoin Price -->
-<div id="btc-box" style="margin-top:60px; margin-bottom:60px; text-align:center;">
-  <h2 style="color:white; font-size:2rem; letter-spacing:1px; margin-bottom:20px;">Live Bitcoin Price</h2>
+<div id="btc-box" style="margin-top:100px; margin-bottom:80px; text-align:center;">
+  <h2 style="color:white; font-size:2rem; letter-spacing:1px; margin-bottom:30px;">Live Bitcoin Price</h2>
   <div id="btc-price" style="font-size:3rem; font-weight:bold; color:#F7931A; transition: all 0.3s ease;">
     Loading...
   </div>
@@ -31,10 +31,12 @@ async function updateBTC() {
     lastPrice = price;
 
   } catch (error) {
-    document.getElementById("btc-price").innerHTML = "Error loading price";
+    priceElement.innerHTML = "Error loading price";
   }
 }
 
+// sofort laden
 updateBTC();
+// alle 15 Sekunden aktualisieren
 setInterval(updateBTC, 15000);
 </script>
