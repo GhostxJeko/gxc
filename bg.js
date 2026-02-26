@@ -1,3 +1,4 @@
+
 // bg.js – Professioneller Partikel-Tunnel mit Kugel-Gather & weißen Partikeln
 
 const canvas = document.getElementById('bgCanvas');
