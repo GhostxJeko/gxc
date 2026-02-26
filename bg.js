@@ -1,3 +1,4 @@
+
 // bg.js – Kosmisches Universum: Lichtkugel, Strudel & Partikel
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
@@ -113,4 +114,4 @@ window.addEventListener('resize',()=>{
 
 // Start
 createParticles();
-animate();
+animate();  
