@@ -100,4 +100,4 @@ function drawParticles() {
       if (p.alpha <= 0) {
         // Neu-Spawn am Rand für realistische Wirkung
         const a = random(0, Math.PI * 2);
-        const r = random(width / 2, width
+        const r = random(width / 2, width 
