@@ -150,4 +150,4 @@ window.addEventListener('resize', () => {
 });
 
 createParticles();
-animate();
+animate(); 
