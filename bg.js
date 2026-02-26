@@ -115,4 +115,4 @@ window.addEventListener('resize', ()=>{
 
 // Start
 createParticles();
-animate();
+animate(); 
