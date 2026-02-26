@@ -1,4 +1,4 @@
-// bg.js – Ultra-smooth Partikel-Tunnel mit Strudel & Explosion (weiß & blau)
+// bg.js – Partikel-Tunnel mit Strudel-Explosion (weiß & blau, flüssig)
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -14,10 +14,10 @@ function random(min, max) { return Math.random() * (max - min) + min; }
 function createParticles() {
   particles.length = 0;
   for (let i = 0; i < particleCount; i++) {
-    const hues = [210, 220, 230, 240]; // Weiß-Blau
+    const hues = [210, 240, 270]; // Blau-Weiß
     const hue = hues[Math.floor(random(0, hues.length))];
-    const sat = random(60, 100);
-    const light = random(80, 100);
+    const sat = random(50, 100);
+    const light = random(70, 100);
     particles.push({
       x: random(0, width),
       y: random(0, height),
@@ -47,7 +47,7 @@ function drawParticles(delta) {
     ctx.beginPath();
     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
     ctx.fillStyle = p.color + p.alpha + ')';
-    ctx.shadowBlur = 15 * Math.min(p.alpha, 1); // weniger Glow, stabil
+    ctx.shadowBlur = 15 * Math.min(p.alpha, 1); // stabiler Glow
     ctx.shadowColor = 'rgba(255,255,255,' + p.alpha + ')';
     ctx.fill();
 
@@ -62,8 +62,8 @@ function drawParticles(delta) {
       p.alpha = Math.min(p.alpha + 0.01 * delta, 1);
     } else if (phase === 'explode') {
       const angle = Math.atan2(p.y - center.y, p.x - center.x);
-      const speed = random(1.5, 3) * delta;
       const swirl = 0.05 * delta;
+      const speed = random(1.5, 3) * delta;
       p.x += Math.cos(angle + swirl) * speed + random(-0.2, 0.2) * delta;
       p.y += Math.sin(angle + swirl) * speed + random(-0.2, 0.2) * delta;
       p.alpha -= p.decay * 1.5 * delta;
@@ -76,10 +76,10 @@ function drawParticles(delta) {
         p.alpha = random(0.5, 1);
         p.radius = random(1.5, 3);
 
-        const hues = [210, 220, 230, 240];
+        const hues = [210, 240, 270];
         const hue = hues[Math.floor(random(0, hues.length))];
-        const sat = random(60, 100);
-        const light = random(80, 100);
+        const sat = random(50, 100);
+        const light = random(70, 100);
         p.color = `hsla(${hue},${sat}%,${light}%,`;
       }
     }
@@ -92,7 +92,7 @@ function drawParticles(delta) {
 }
 
 function animate(now = performance.now()) {
-  const delta = (now - lastTime) / 16.666; // ca. 60fps Referenz
+  const delta = (now - lastTime) / 16.666; // 60fps Referenz
   lastTime = now;
 
   drawParticles(delta);
