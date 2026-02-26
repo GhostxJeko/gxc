@@ -1,5 +1,4 @@
-
-// bg.js – Optimierter Partikel-Tunnel mit Farbe, Glow & Explosion
+// bg.js – Professioneller Partikel-Tunnel mit Glow & Explosion
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -12,10 +11,11 @@ const particleCount = 200; // realistisch & übersichtlich
 
 function random(min, max) { return Math.random() * (max - min) + min; }
 
+// Partikel erzeugen
 function createParticles() {
   particles.length = 0;
   for (let i = 0; i < particleCount; i++) {
-    const hue = random(30, 60); // gelb-orange Bereich
+    const hue = random(30, 60); // gelb-orangene Töne
     const sat = random(60, 100);
     const light = random(60, 80);
     particles.push({
@@ -34,15 +34,17 @@ function createParticles() {
 let phase = 'float'; // float -> gather -> explode
 let timer = 0;
 
+// Hintergrund zeichnen
 function drawBackground() {
   ctx.fillStyle = '#000'; // schwarzer Hintergrund
   ctx.fillRect(0, 0, width, height);
 }
 
+// Partikel zeichnen & bewegen
 function drawParticles() {
   drawBackground();
 
-  // Hintergrund-Sterne für Tiefe
+  // kleine Sterne für Tiefenwirkung
   for (let i = 0; i < 6; i++) {
     const sx = random(0, width);
     const sy = random(0, height);
@@ -97,17 +99,19 @@ function drawParticles() {
   }
 }
 
+// Animation Loop
 function animate() {
   drawParticles();
   requestAnimationFrame(animate);
   timer++;
 
-  // Phasensteuerung
+  // Phasensteuerung für fließende Animation
   if (timer % 1500 === 0) phase = 'gather';
   if (timer % 1500 === 500) phase = 'explode';
   if (timer % 1500 === 1000) phase = 'float';
 }
 
+// Resize-Event
 window.addEventListener('resize', () => {
   width = canvas.width = window.innerWidth;
   height = canvas.height = window.innerHeight;
@@ -115,5 +119,6 @@ window.addEventListener('resize', () => {
   center.y = height / 2;
 });
 
+// Start
 createParticles();
-animate(); 
+animate();
