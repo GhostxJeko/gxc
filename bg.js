@@ -1,4 +1,4 @@
-// bg.js – Professioneller Partikel-Tunnel mit Glow & Explosion
+// bg.js – Professioneller Partikel-Tunnel mit Kugel-Gather & weißen Partikeln
 
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
@@ -12,7 +12,7 @@ const center = {
 };
 
 const particles = [];
-const particleCount = 200; // realistisch & übersichtlich
+const particleCount = 200;
 
 function random(min, max) {
   return Math.random() * (max - min) + min;
@@ -23,9 +23,18 @@ function createParticles() {
   particles.length = 0;
 
   for (let i = 0; i < particleCount; i++) {
-    const hue = random(30, 60); // gelb-orangene Töne
-    const sat = random(60, 100);
-    const light = random(60, 80);
+
+    let colorString;
+
+    // 20% weiße Partikel
+    if (Math.random() < 0.2) {
+      colorString = `rgba(255,255,255,`;
+    } else {
+      const hue = random(30, 60);
+      const sat = random(60, 100);
+      const light = random(60, 80);
+      colorString = `hsla(${hue}, ${sat}%, ${light}%,`;
+    }
 
     particles.push({
       x: random(0, width),
@@ -35,25 +44,23 @@ function createParticles() {
       radius: random(1.5, 3),
       alpha: random(0.5, 1),
       decay: random(0.001, 0.003),
-      color: `hsla(${hue}, ${sat}%, ${light}%,`
+      color: colorString
     });
   }
 }
 
-let phase = 'float'; // float -> gather -> explode
+let phase = 'float';
 let timer = 0;
 
-// Hintergrund zeichnen
 function drawBackground() {
-  ctx.fillStyle = '#000'; // schwarzer Hintergrund
+  ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, width, height);
 }
 
-// Partikel zeichnen & bewegen
 function drawParticles() {
   drawBackground();
 
-  // kleine Sterne für Tiefenwirkung
+  // kleine Sterne
   for (let i = 0; i < 6; i++) {
     const sx = random(0, width);
     const sy = random(0, height);
@@ -75,7 +82,6 @@ function drawParticles() {
     ctx.shadowColor = p.color + p.alpha + ')';
     ctx.fill();
 
-    // Bewegung basierend auf Phase
     if (phase === 'float') {
 
       p.vx += random(-0.008, 0.008);
@@ -85,8 +91,16 @@ function drawParticles() {
 
     } else if (phase === 'gather') {
 
-      p.x += (center.x - p.x) * 0.03;
-      p.y += (center.y - p.y) * 0.03;
+      // Kugelförmiges Sammeln
+      const dx = center.x - p.x;
+      const dy = center.y - p.y;
+      const distance = Math.sqrt(dx * dx + dy * dy);
+
+      if (distance > 2) {
+        p.x += (dx / distance) * 2.5;
+        p.y += (dy / distance) * 2.5;
+      }
+
       p.alpha = Math.min(p.alpha + 0.01, 1);
 
     } else if (phase === 'explode') {
@@ -100,7 +114,6 @@ function drawParticles() {
       p.alpha -= p.decay * 1.5;
 
       if (p.alpha <= 0) {
-
         const a = random(0, Math.PI * 2);
         const r = random(width / 3, width / 2);
 
@@ -111,7 +124,6 @@ function drawParticles() {
       }
     }
 
-    // Float Begrenzung
     if (phase === 'float') {
       if (p.x < 0 || p.x > width) p.vx *= -1;
       if (p.y < 0 || p.y > height) p.vy *= -1;
@@ -119,19 +131,16 @@ function drawParticles() {
   }
 }
 
-// Animation Loop
 function animate() {
   drawParticles();
   requestAnimationFrame(animate);
   timer++;
 
-  // Phasensteuerung für fließende Animation
   if (timer % 1500 === 0) phase = 'gather';
   if (timer % 1500 === 500) phase = 'explode';
   if (timer % 1500 === 1000) phase = 'float';
 }
 
-// Resize-Event
 window.addEventListener('resize', () => {
   width = canvas.width = window.innerWidth;
   height = canvas.height = window.innerHeight;
@@ -139,6 +148,5 @@ window.addEventListener('resize', () => {
   center.y = height / 2;
 });
 
-// Start
 createParticles();
 animate();
