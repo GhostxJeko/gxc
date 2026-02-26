@@ -1,3 +1,4 @@
+
 // bg.js – Finale Version: Partikel-Tunnel mit Strudel & Farb-Rückflug
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
