@@ -142,4 +142,4 @@ window.addEventListener('resize',()=>{
   height = canvas.height = window.innerHeight;
   center.x = width/2;
   center.y = height/2;
-}); 
+});
