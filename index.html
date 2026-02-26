@@ -16,12 +16,15 @@
       <h1>Ghost-X Crypto Society</h1>
       <p>Unlock secret crypto strategies, market insights, and insider knowledge. Join the elite, where only the curious thrive.</p>
     </header>
-<div id="btc-box" style="margin-top:20px; text-align:center;">
-  <h2 style="color:white; font-size:1.8rem;">Live Bitcoin Price</h2>
-  <div id="btc-price" style="font-size:1.5rem; font-weight:bold; color:#F7931A;">
-    Loading...
-  </div>
-</div>
+
+    <!-- Live Bitcoin Price -->
+    <div id="btc-box" style="margin-top:40px; text-align:center;">
+      <h2 style="color:white; font-size:2rem; letter-spacing:1px;">Live Bitcoin Price</h2>
+      <div id="btc-price" style="font-size:3rem; font-weight:bold; color:#F7931A; transition: all 0.3s ease;">
+        Loading...
+      </div>
+    </div>
+
     <section class="features">
       <div class="feature">
         <h2>Exclusive Analysis</h2>
@@ -45,37 +48,44 @@
       <p>&copy; 2026 Ghost-X Community. All rights reserved.</p>
     </footer>
   </div>
-<script>
-let lastPrice = null;
 
-async function updateBTC() {
-  try {
-    const response = await fetch(
-      "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur"
-    );
-    const data = await response.json();
-    const price = data.bitcoin.eur;
+  <!-- Background Animation Script -->
+  <script src="bg.js"></script>
 
-    const priceElement = document.getElementById("btc-price");
+  <!-- Live Bitcoin Price Script -->
+  <script>
+    let lastPrice = null;
 
-    if (lastPrice !== null) {
-      if (price > lastPrice) {
-        priceElement.style.color = "lime";
-      } else if (price < lastPrice) {
-        priceElement.style.color = "red";
+    async function updateBTC() {
+      try {
+        const response = await fetch(
+          "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=eur"
+        );
+        const data = await response.json();
+        const price = data.bitcoin.eur;
+
+        const priceElement = document.getElementById("btc-price");
+
+        if (lastPrice !== null) {
+          if (price > lastPrice) {
+            priceElement.style.color = "lime";
+          } else if (price < lastPrice) {
+            priceElement.style.color = "red";
+          }
+        }
+
+        priceElement.innerHTML = "€ " + price.toLocaleString();
+        lastPrice = price;
+
+      } catch (error) {
+        document.getElementById("btc-price").innerHTML = "Error loading price";
       }
     }
 
-    priceElement.innerHTML = "€ " + price.toLocaleString();
-    lastPrice = price;
-
-  } catch (error) {
-    document.getElementById("btc-price").innerHTML = "Error loading price";
-  }
-}
-
-updateBTC();
-setInterval(updateBTC, 15000);
-</script>
+    // sofort laden
+    updateBTC();
+    // alle 15 Sekunden aktualisieren
+    setInterval(updateBTC, 15000);
+  </script>
 </body>
 </html>
