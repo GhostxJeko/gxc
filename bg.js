@@ -1,4 +1,3 @@
-// bg.js – Partikel-Tunnel mit Kugel-Anfang & starker Strudel
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -7,7 +6,7 @@ let height = canvas.height = window.innerHeight;
 const center = { x: width/2, y: height/2 };
 
 const particles = [];
-const particleCount = 250; // mehr Partikel für den Strudel
+const particleCount = 250;
 
 function random(min, max) { return Math.random()*(max-min)+min; }
 
@@ -16,9 +15,8 @@ function createParticles() {
     particles.length = 0;
     for(let i=0;i<particleCount;i++){
         const angle = random(0, Math.PI*2);
-        const radius = random(0, Math.min(width,height)/2.5); // kugelförmig
-        const hue = 210; // blau
-        const light = random(200,255); // weiß-blau
+        const radius = random(0, Math.min(width,height)/2.5);
+        const light = random(200,255);
         particles.push({
             x: center.x + Math.cos(angle)*radius,
             y: center.y + Math.sin(angle)*radius,
@@ -64,22 +62,19 @@ function drawParticles(){
         ctx.fill();
 
         if(phase==='float'){
-            // sanftes Schweben, leicht zusammenziehend
             p.vx += random(-0.008,0.008);
             p.vy += random(-0.008,0.008);
-            p.x += p.vx + (center.x-p.x)*0.001; // kleine Anziehung
+            p.x += p.vx + (center.x-p.x)*0.001;
             p.y += p.vy + (center.y-p.y)*0.001;
         } else if(phase==='gather'){
-            // stärkeres Anziehen zur Mitte
             p.x += (center.x - p.x)*0.05;
             p.y += (center.y - p.y)*0.05;
             p.alpha = Math.min(p.alpha+0.01,1);
         } else if(phase==='explode'){
-            // starker Strudel mit Spiralbewegung
             const dx = p.x - center.x;
             const dy = p.y - center.y;
             const angle = Math.atan2(dy,dx);
-            const swirl = 0.25; // starker Strudel
+            const swirl = 0.25;
             const speed = random(2,4);
             p.x += Math.cos(angle+swirl)*speed + random(-0.3,0.3);
             p.y += Math.sin(angle+swirl)*speed + random(-0.3,0.3);
@@ -92,7 +87,6 @@ function drawParticles(){
                 p.y = center.y + Math.sin(a)*r;
                 p.alpha = random(0.5,1);
                 p.radius = random(1.5,3);
-                // Explosion jetzt bunt: rot, gelb, blau, weiß
                 const hues = [0,45,210,240,60];
                 const hue = hues[Math.floor(random(0,hues.length))];
                 const sat = random(60,100);
@@ -101,7 +95,6 @@ function drawParticles(){
             }
         }
 
-        // Float-Begrenzung
         if(phase==='float'){
             if(p.x<0 || p.x>width) p.vx*=-1;
             if(p.y<0 || p.y>height) p.vy*=-1;
@@ -126,4 +119,4 @@ window.addEventListener('resize',()=>{
 });
 
 createParticles();
-animate();  
+animate();
