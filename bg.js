@@ -1,121 +1,116 @@
-// bg.js – Ultimatives Kosmos-Universum: Lichtkugel & Strudel
+// bg.js – Galaktischer Partikel-Wirbel Universum
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
 let width = canvas.width = window.innerWidth;
 let height = canvas.height = window.innerHeight;
-const center = { x: width/2, y: height/2 };
+let center = { x: width/2, y: height/2 };
 
 const particles = [];
-const START_COUNT = 60;    // Anfangspartikel
-const MAX_COUNT = 200;     // Maximal für Strudel
+const MAX_PARTICLES = 180; // insgesamt
+const START_PARTICLES = 40; // am Anfang
 
-function random(min, max){ return Math.random()*(max-min)+min; }
+function rand(min, max){ return Math.random()*(max-min)+min; }
 
 // Partikel erzeugen
-function createParticles(){
+function createParticles() {
     particles.length = 0;
-    for(let i=0;i<MAX_COUNT;i++){
-        const hues = [210,220,230,240]; // Anfang: Weiß-Blau
-        const hue = hues[Math.floor(random(0,hues.length))];
+    for(let i=0; i<MAX_PARTICLES; i++){
+        const hueOptions = [210, 220, 230, 240];
+        const hue = hueOptions[Math.floor(rand(0, hueOptions.length))];
         particles.push({
-            x: random(0,width),
-            y: random(0,height),
-            vx: random(-0.1,0.1),
-            vy: random(-0.1,0.1),
-            radius: random(1.5,3),
-            alpha: i<START_COUNT?random(0.5,1):0,
-            active: i<START_COUNT,
-            decay: random(0.0005,0.002),
-            color: `hsla(${hue},80%,${random(80,100)}%,`
+            x: rand(0, width),
+            y: rand(0, height),
+            vx: rand(-0.1, 0.1),
+            vy: rand(-0.1, 0.1),
+            radius: rand(1.2, 2.5),
+            alpha: i < START_PARTICLES ? rand(0.6,1) : 0,
+            active: i < START_PARTICLES,
+            hue: hue
         });
     }
 }
 
-let phase = 'float';
+let phase = "float"; // float -> gather -> swirl
 let timer = 0;
 
-// Fenstergröße anpassen
-function resize(){
+// Resize Event
+window.addEventListener('resize', () => {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
     center.x = width/2;
     center.y = height/2;
-}
-window.addEventListener('resize',resize);
+});
 
-// Hintergrund
+// Hintergrund zeichnen
 function drawBackground(){
-    ctx.fillStyle = '#000';
+    ctx.fillStyle = "rgba(0,0,0,0.15)"; // leichter Trail
     ctx.fillRect(0,0,width,height);
 }
 
-// Partikel bewegen & zeichnen
+// Zeichnen & Bewegen
 function drawParticles(){
     drawBackground();
 
-    for(let p of particles){
-        if(!p.active) continue;
+    // Lichtkugel Puls
+    const pulse = Math.sin(Date.now()*0.002)*5;
+
+    particles.forEach(p=>{
+        if(!p.active) return;
 
         ctx.beginPath();
-        ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-        ctx.fillStyle = p.color+p.alpha+')';
-        ctx.shadowBlur = 15+10*p.alpha;
-        ctx.shadowColor = 'rgba(255,255,255,'+p.alpha+')';
+        ctx.arc(p.x, p.y, p.radius + pulse*0.05, 0, Math.PI*2);
+        ctx.fillStyle = `hsla(${p.hue},90%,75%,${p.alpha})`;
+        ctx.shadowBlur = 20 + 10*p.alpha;
+        ctx.shadowColor = `hsla(${p.hue},90%,75%,${p.alpha})`;
         ctx.fill();
 
-        if(phase==='float'){
-            // Sanft schweben
-            p.vx += random(-0.005,0.005);
-            p.vy += random(-0.005,0.005);
+        // Bewegung
+        if(phase==="float"){
+            p.vx += rand(-0.002,0.002);
+            p.vy += rand(-0.002,0.002);
             p.x += p.vx;
             p.y += p.vy;
-            if(p.x<0||p.x>width)p.vx*=-1;
-            if(p.y<0||p.y>height)p.vy*=-1;
-        } 
-        else if(phase==='gather'){
-            // Anziehung zur Lichtkugel
-            p.x += (center.x-p.x)*0.02;
-            p.y += (center.y-p.y)*0.02;
+            if(p.x<0 || p.x>width) p.vx*=-1;
+            if(p.y<0 || p.y>height) p.vy*=-1;
+        } else if(phase==="gather"){
+            const dx = center.x - p.x;
+            const dy = center.y - p.y;
+            p.x += dx*0.015;
+            p.y += dy*0.015;
             p.alpha = Math.min(p.alpha+0.01,1);
-        } 
-        else if(phase==='explode'){
-            // Strudelartige Explosion
+        } else if(phase==="swirl"){
             const dx = p.x - center.x;
             const dy = p.y - center.y;
-            const angle = Math.atan2(dy,dx);
-            const swirl = 0.15;
-            const speed = random(1,2.5);
-            p.x += Math.cos(angle+swirl)*speed + random(-0.2,0.2);
-            p.y += Math.sin(angle+swirl)*speed + random(-0.2,0.2);
-            p.alpha -= p.decay*1.5;
+            const angle = Math.atan2(dy, dx);
+            const swirlStrength = 0.12;
+            const speed = rand(0.5,1.2);
+            p.x += Math.cos(angle+swirlStrength)*speed + rand(-0.1,0.1);
+            p.y += Math.sin(angle+swirlStrength)*speed + rand(-0.1,0.1);
+            p.alpha -= 0.0015;
 
+            // Farbe bei Explosion
             if(p.alpha<=0){
-                // Zurücksetzen an zufälliger Position
-                p.x = random(0,width);
-                p.y = random(0,height);
-                p.alpha = random(0.5,1);
-                p.radius = random(1.5,3);
-
-                // Farben für Explosion: Rot, Gelb, Blau, Weiß
+                p.x = center.x;
+                p.y = center.y;
+                p.alpha = rand(0.5,1);
+                p.radius = rand(1.2,2.5);
                 const hues = [0,45,210,240,60];
-                const hue = hues[Math.floor(random(0,hues.length))];
-                const sat = random(60,100);
-                const light = random(70,100);
-                p.color = `hsla(${hue},${sat}%,${light}%,`;
+                const hue = hues[Math.floor(rand(0,hues.length))];
+                p.hue = hue;
             }
         }
-    }
+    });
 }
 
-// Aktiviert zusätzliche Partikel für Strudel
-function activateMoreParticles(){
+// Aktivierung zusätzlicher Partikel im Strudel
+function activateParticles(){
     particles.forEach(p=>{
         if(!p.active){
             p.active = true;
-            p.x = center.x;
-            p.y = center.y;
-            p.alpha = random(0.5,1);
+            p.x = center.x + rand(-50,50);
+            p.y = center.y + rand(-50,50);
+            p.alpha = rand(0.6,1);
         }
     });
 }
@@ -126,14 +121,13 @@ function animate(){
     requestAnimationFrame(animate);
     timer++;
 
-    // Phasen: langsam und kosmisch
-    if(timer===600) phase='gather';
-    if(timer===1200){ 
-        activateMoreParticles();
-        phase='explode';
+    if(timer===300) phase="gather";
+    if(timer===700){
+        activateParticles();
+        phase="swirl";
     }
-    if(timer===3000){
-        phase='float';
+    if(timer===1600){
+        phase="float";
         timer=0;
     }
 }
