@@ -1,18 +1,19 @@
-/* ================== Allgemein ================== */
+/* ================== Grundlegendes ================== */
 body, html {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: 'Orbitron', sans-serif;
-  overflow: hidden;
-  background: black;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: transparent; /* Hintergrund vom Canvas sichtbar */
   color: #fff;
 }
 
-/* Container über Canvas */
+/* ================== Container über Canvas ================== */
 .container {
   position: relative;
-  z-index: 2;
+  z-index: 2; /* Liegt über dem Canvas */
   text-align: center;
   padding: 50px 20px;
   max-width: 1000px;
@@ -20,7 +21,7 @@ body, html {
   min-height: 200vh; /* sorgt für vertikales Scrollen */
 }
 
-/* Header */
+/* ================== Header ================== */
 header h1 {
   font-size: 3em;
   color: #ff7f00; /* Neon-Orange */
@@ -47,7 +48,7 @@ header p {
 }
 
 .feature {
-  background: rgba(20,20,20,0.6); /* dunkler & transparent */
+  background: rgba(20,20,20,0.6);
   padding: 35px;
   border-radius: 25px;
   max-width: 320px;
@@ -109,19 +110,13 @@ footer {
 
 /* ================== Canvas Background ================== */
 #bgCanvas {
-  position: fixed;
+  position: fixed;      /* Canvas bleibt beim Scrollen */
   top: 0;
   left: 0;
-  z-index: 1;
   width: 100%;
   height: 100%;
-  pointer-events: none; /* Canvas blockiert Scroll nicht */
-}
-
-/* Scrollbar aktivieren */
-html, body {
-  overflow-y: auto;
-  overflow-x: hidden;
+  z-index: -1;          /* Canvas liegt unter allen Inhalten */
+  pointer-events: none;  /* Canvas blockiert Klicks nicht */
 }
 
 /* ================== Live-Bitcoin Anzeige ================== */
