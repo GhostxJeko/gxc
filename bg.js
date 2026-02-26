@@ -1,4 +1,3 @@
-
 // bg.js – Ultimative kosmische Partikel-Lichtkugel mit Strudel
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
@@ -117,4 +116,4 @@ window.addEventListener('resize', () => {
 
 // Start
 createParticles();
-animate();  
+animate(); 
