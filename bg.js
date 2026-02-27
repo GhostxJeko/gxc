@@ -1,143 +1,81 @@
-// bg.js – Galaxie-Strudel High-End (Blau & Weiß, sauber, schwarz)
-const canvas = document.getElementById('bgCanvas');
-const ctx = canvas.getContext('2d');
+// Erweiterung deines bg.js für kosmische Explosion
+let explodeTimer = 0;
 
-let width = canvas.width = window.innerWidth;
-let height = canvas.height = window.innerHeight;
-const center = { x: width/2, y: height/2 };
+function drawParticles() {
+    drawBackground();
 
-const CONFIG = {
-  initialParticles: 8,      // wenige am Anfang
-  totalParticles: 200,      // volle Dichte später
-  hues: [210, 0],           // Blau & Weiß
-  phases: { FLOAT:'float', GATHER:'gather', EXPLODE:'explode' },
-  gatherRadius: 120,
-  swirlSpeed: 0.05,
-  explodeSpeed: 2.5,
-  glowBlur: 25,
-  trailAlpha: 0.05
-};
+    particles.forEach(p => {
+        if (!p.active) return;
 
-const random = (min,max)=>Math.random()*(max-min)+min;
-const randomHue = ()=>CONFIG.hues[Math.floor(random(0,CONFIG.hues.length))];
-const createColor = ()=>`hsla(${randomHue()},80%,80%,`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${p.alpha})`;
+        ctx.shadowBlur = 20;
+        ctx.shadowColor = `hsla(${p.hue}, 90%, 75%, ${p.alpha})`;
+        ctx.fill();
 
-class Particle {
-  constructor(initial=false){
-    this.reset(initial);
-    this.trail = [];
-  }
-
-  reset(initial=false){
-    if(initial){
-      this.x = center.x + random(-40,40);
-      this.y = center.y + random(-40,40);
-    } else {
-      const angle = random(0, Math.PI*2);
-      const r = random(10, CONFIG.gatherRadius);
-      this.x = center.x + Math.cos(angle)*r;
-      this.y = center.y + Math.sin(angle)*r;
-    }
-    this.vx = random(-0.1,0.1);
-    this.vy = random(-0.1,0.1);
-    this.radius = random(1.5,2.5);
-    this.alpha = random(0.5,0.9);
-    this.decay = random(0.001,0.002);
-    this.color = createColor();
-    this.angleOffset = random(0, Math.PI*2);
-    this.trail = [];
-  }
-
-  update(phase){
-    if(phase===CONFIG.phases.FLOAT){
-      this.vx += random(-0.003,0.003);
-      this.vy += random(-0.003,0.003);
-      this.x += this.vx;
-      this.y += this.vy;
-      if(this.x<0||this.x>width) this.vx*=-1;
-      if(this.y<0||this.y>height) this.vy*=-1;
-
-    } else if(phase===CONFIG.phases.GATHER){
-      const dx = center.x - this.x;
-      const dy = center.y - this.y;
-      const dist = Math.sqrt(dx*dx + dy*dy);
-      const angle = Math.atan2(dy,dx) + this.angleOffset;
-      const swirl = 0.04 * dist;
-      this.x = center.x + Math.cos(angle+swirl)*Math.min(dist, CONFIG.gatherRadius);
-      this.y = center.y + Math.sin(angle+swirl)*Math.min(dist, CONFIG.gatherRadius);
-      this.alpha = Math.min(this.alpha+0.02,1);
-
-    } else if(phase===CONFIG.phases.EXPLODE){
-      const dx = this.x - center.x;
-      const dy = this.y - center.y;
-      const angle = Math.atan2(dy,dx);
-      const swirl = CONFIG.swirlSpeed;
-      const speed = random(CONFIG.explodeSpeed*0.7, CONFIG.explodeSpeed*1.3);
-      this.x += Math.cos(angle+swirl)*speed + random(-0.2,0.2);
-      this.y += Math.sin(angle+swirl)*speed + random(-0.2,0.2);
-      this.alpha -= this.decay;
-
-      if(this.alpha<=0) this.reset(false);
-    }
-
-    // Trail speichern
-    this.trail.push({x:this.x,y:this.y,alpha:this.alpha});
-    if(this.trail.length>6) this.trail.shift();
-  }
-
-  draw(){
-    for(let i=0;i<this.trail.length;i++){
-      const t = this.trail[i];
-      ctx.beginPath();
-      ctx.arc(t.x,t.y,this.radius*(i/6+0.3),0,Math.PI*2);
-      ctx.fillStyle = this.color + t.alpha*(i/6+0.3) + ')';
-      ctx.shadowBlur = CONFIG.glowBlur*(i/6+0.3);
-      ctx.shadowColor = `rgba(255,255,255,${t.alpha*(i/6+0.3)})`;
-      ctx.fill();
-    }
-
-    ctx.beginPath();
-    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
-    ctx.fillStyle = this.color + this.alpha + ')';
-    ctx.shadowBlur = CONFIG.glowBlur;
-    ctx.shadowColor = `rgba(255,255,255,${this.alpha})`;
-    ctx.fill();
-  }
+        if (phase === "float") {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > width) p.vx *= -1;
+            if (p.y < 0 || p.y > height) p.vy *= -1;
+        }
+        else if (phase === "gather") {
+            p.x += (centerX - p.x) * 0.08;
+            p.y += (centerY - p.y) * 0.08;
+        }
+        else if (phase === "explode") {
+            if (!p.exploded) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = rand(2, 5);
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed;
+                p.exploded = true;
+            }
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 0.004;
+            if (p.alpha <= 0) {
+                p.x = centerX;
+                p.y = centerY;
+                p.alpha = rand(0.6, 1);
+                p.exploded = false;
+            }
+        }
+        else if (phase === "swirl") {
+            const dx = p.x - centerX;
+            const dy = p.y - centerY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            let angle = Math.atan2(dy, dx) + 0.05;
+            let radius = dist * 0.97;
+            p.x = centerX + Math.cos(angle) * radius;
+            p.y = centerY + Math.sin(angle) * radius;
+            p.x += (Math.random() - 0.5) * 1.5;
+            p.y += (Math.random() - 0.5) * 1.5;
+            p.alpha -= 0.002;
+            if (p.alpha <= 0) {
+                p.x = centerX;
+                p.y = centerY;
+                p.alpha = rand(0.6, 1);
+            }
+        }
+    });
 }
 
-let particles = Array.from({length: CONFIG.initialParticles}, ()=>new Particle(true));
-let extraAdded=false;
-let phase = CONFIG.phases.FLOAT;
-let timer=0;
+function animate() {
+    drawParticles();
+    requestAnimationFrame(animate);
 
-const drawBackground = ()=>{
-  ctx.fillStyle = `rgba(0,0,0,${CONFIG.trailAlpha})`;
-  ctx.fillRect(0,0,width,height);
-};
+    timer++;
 
-function animate(){
-  drawBackground();
-  particles.forEach(p=>{p.update(phase); p.draw();});
-
-  if(!extraAdded && timer>150){
-    const more = Array.from({length: CONFIG.totalParticles - CONFIG.initialParticles}, ()=>new Particle());
-    particles = particles.concat(more);
-    extraAdded = true;
-  }
-
-  timer++;
-  if(timer%3000===0) phase=CONFIG.phases.GATHER;
-  if(timer%3000===1500) phase=CONFIG.phases.EXPLODE;
-  if(timer%3000===2500) phase=CONFIG.phases.FLOAT;
-
-  requestAnimationFrame(animate);
+    if (timer === 400) phase = "gather";          // zur Mitte ziehen
+    if (timer === 650) phase = "explode";         // Lichtball explodiert
+    if (timer === 950) {                          // Strudel
+        activateMoreParticles();
+        phase = "swirl";
+    }
+    if (timer === 1500) {                         // Reset
+        phase = "float";
+        timer = 0;
+    }
 }
-
-window.addEventListener('resize',()=>{
-  width=canvas.width=window.innerWidth;
-  height=canvas.height=window.innerHeight;
-  center.x = width/2;
-  center.y = height/2;
-});
-
-animate();
