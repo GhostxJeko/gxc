@@ -1,23 +1,26 @@
+/* Grundlegendes */
 body, html {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: 'Orbitron', sans-serif;
-  overflow: hidden;
-  background: transparent;
+  overflow-x: hidden;
+  background: #000; /* schwarzer Hintergrund für bessere Partikel */
   color: #fff;
 }
 
+/* Container über Canvas */
 .container {
   position: relative;
   z-index: 2;
   text-align: center;
   padding: 50px 20px;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
-  min-height: 200vh;
+  min-height: 200vh; /* scrollbare Seite */
 }
 
+/* Header */
 header h1 {
   font-size: 3em;
   color: #ff7f00;
@@ -27,26 +30,28 @@ header h1 {
 
 header p {
   font-size: 1.2em;
-  max-width: 700px;
+  max-width: 800px;
   margin: 0 auto 50px auto;
   line-height: 1.5;
   color: #ffa64d;
   text-shadow: 0 0 6px rgba(255,160,77,0.6);
 }
 
+/* Feature-Boxen */
 .features {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 25px;
+  gap: 30px;
   margin-bottom: 50px;
 }
 
 .feature {
-  background: rgba(20,20,20,0.6);
-  padding: 35px;
+  background: rgba(20,20,20,0.8);
+  padding: 40px;
   border-radius: 25px;
-  max-width: 320px;
+  flex: 1 1 280px;
+  max-width: 350px;
   box-shadow:
     0 0 20px rgba(255,127,0,0.9),
     0 0 40px rgba(255,127,0,0.6),
@@ -76,14 +81,15 @@ header p {
   text-shadow: 0 0 6px rgba(255,160,77,0.6);
 }
 
+/* Call to Action */
 .cta-button {
-  padding: 20px 40px;
+  padding: 20px 45px;
   background: #ff7f00;
   color: #fff;
   text-decoration: none;
   font-weight: bold;
   border-radius: 12px;
-  font-size: 1.2em;
+  font-size: 1.3em;
   transition: 0.3s;
   text-shadow: 0 0 10px #ff7f00;
 }
@@ -95,12 +101,14 @@ header p {
   box-shadow: 0 0 20px #ff7f00;
 }
 
+/* Footer */
 footer {
   margin-top: 60px;
   font-size: 0.9em;
   color: #888;
 }
 
+/* Canvas */
 #bgCanvas {
   position: fixed;
   top: 0;
@@ -111,41 +119,7 @@ footer {
   pointer-events: none;
 }
 
+/* Scrollbar */
 html, body {
   overflow-y: auto;
-  overflow-x: hidden;
-}
-
-#btc-box {
-  margin-top: 160px;
-  margin-bottom: 150px;
-  text-align: center;
-}
-
-#btc-box h2 {
-  color: #fff;
-  font-size: 2.2rem;
-  letter-spacing: 1px;
-  margin-bottom: 35px;
-  text-shadow: 0 0 15px #F7931A, 0 0 30px rgba(247,147,26,0.6);
-}
-
-#btc-price {
-  font-size: 3.5rem;
-  font-weight: bold;
-  color: #F7931A;
-  transition: all 0.4s ease;
-  text-shadow: 0 0 20px #F7931A, 0 0 40px rgba(247,147,26,0.5);
-}
-
-.fade-in {
-  opacity: 0;
-  transform: translateY(25px);
-  transition: opacity 0.8s ease, transform 0.8s ease, text-shadow 0.8s ease;
-}
-
-.fade-in.visible {
-  opacity: 1;
-  transform: translateY(0);
-  text-shadow: 0 0 10px rgba(255,127,0,0.5);
 }
