@@ -1,4 +1,4 @@
-// bg.js – High-End Kosmos-Strudel, exakt wie vorher schwarz
+// bg.js – Exakt alte Version, stabil & sauber
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -7,15 +7,15 @@ let height = canvas.height = window.innerHeight;
 const center = { x: width/2, y: height/2 };
 
 const CONFIG = {
-  initialParticleCount: 8,  // wenige Partikel am Start
-  totalParticleCount: 220,  // volle Dichte nach Start
-  hues: [210, 0],           // Blau & Weiß
+  initialParticleCount: 8,
+  totalParticleCount: 220,
+  hues: [210, 0], // Blau & Weiß
   phases: { FLOAT:'float', GATHER:'gather', EXPLODE:'explode' },
   gatherRadius: 100,
   swirlSpeed: 0.04,
   explodeSpeed: 2.2,
-  glowBlur: 15,             // dezent, klare Partikel
-  trailAlpha: 0.12          // Schwarzer Hintergrund sichtbar, Tunnel-Effekt
+  glowBlur: 15,
+  trailAlpha: 0.12
 };
 
 const random = (min,max)=>Math.random()*(max-min)+min;
@@ -56,7 +56,6 @@ class Particle {
       this.y += this.vy;
       if(this.x<0||this.x>width) this.vx*=-1;
       if(this.y<0||this.y>height) this.vy*=-1;
-
     } else if(phase===CONFIG.phases.GATHER){
       const dx = center.x - this.x;
       const dy = center.y - this.y;
@@ -66,7 +65,6 @@ class Particle {
       this.x = center.x + Math.cos(angle + swirl)*Math.min(dist, CONFIG.gatherRadius);
       this.y = center.y + Math.sin(angle + swirl)*Math.min(dist, CONFIG.gatherRadius);
       this.alpha = Math.min(this.alpha + 0.02,1);
-
     } else if(phase===CONFIG.phases.EXPLODE){
       const dx = this.x - center.x;
       const dy = this.y - center.y;
@@ -108,7 +106,7 @@ let phase=CONFIG.phases.FLOAT;
 let timer=0;
 
 const drawBackground = ()=>{
-  ctx.fillStyle = `rgba(0,0,0,${CONFIG.trailAlpha})`; // Klarer schwarzer Hintergrund
+  ctx.fillStyle = `rgba(0,0,0,${CONFIG.trailAlpha})`;
   ctx.fillRect(0,0,width,height);
 };
 
