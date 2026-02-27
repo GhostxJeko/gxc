@@ -1,5 +1,10 @@
 // bg.js – High-End Partikel-Tunnel mit Strudel-Explosion
+
+document.addEventListener("DOMContentLoaded", function () {
+
 const canvas = document.getElementById('bgCanvas');
+if (!canvas) return; // Sicherheitscheck, verhindert Crash
+
 const ctx = canvas.getContext('2d');
 
 let width = canvas.width = window.innerWidth;
@@ -10,7 +15,7 @@ const center = { x: width / 2, y: height / 2 };
 const CONFIG = {
   particleCount: 200,
   starCount: 6,
-  hues: [210, 240, 270], // Blau-Nuancen
+  hues: [210, 240, 270],
   phases: { FLOAT: 'float', GATHER: 'gather', EXPLODE: 'explode' },
 };
 
@@ -135,3 +140,5 @@ window.addEventListener('resize', () => {
 
 // START
 animate();
+
+});
