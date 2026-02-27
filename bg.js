@@ -1,124 +1,93 @@
-// bg.js – Kosmisches Universum: Weiß/blau Partikel, Lichtball, Explosion, Strudel
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
 let width = canvas.width = window.innerWidth;
 let height = canvas.height = window.innerHeight;
-const center = { x: width/2, y: height/2 };
+const center = { x: width / 2, y: height / 2 };
 
-const particleCount = 200;
-const particles = [];
+const CONFIG = {
+  particleCount: 200,
+  starCount: 6,
+  hues: [210, 240, 270],
+  phases: { FLOAT: 'float', GATHER: 'gather', EXPLODE: 'explode' },
+};
 
-function random(min,max){ return Math.random()*(max-min)+min; }
+const random = (min, max) => Math.random() * (max - min) + min;
+const randomHue = () => CONFIG.hues[Math.floor(random(0, CONFIG.hues.length))];
+const createColor = () => `hsla(${randomHue()},${random(50, 100)}%,${random(70, 100)}%,`;
 
-function createParticles(){
-  particles.length = 0;
-  for(let i=0;i<particleCount;i++){
-    const hues = [0,210,230,240]; // Weiß + Blau
-    const hue = hues[Math.floor(random(0,hues.length))];
-    const sat = random(50,100);
-    const light = random(70,100);
-    particles.push({
-      x: random(0,width),
-      y: random(0,height),
-      vx: random(-0.2,0.2),
-      vy: random(-0.2,0.2),
-      radius: random(1.5,3),
-      alpha: random(0.5,1),
-      decay: random(0.001,0.003),
-      color: `hsla(${hue},${sat}%,${light}%,`,
-    });
+class Particle {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = random(0, width);
+    this.y = random(0, height);
+    this.vx = random(-0.2, 0.2);
+    this.vy = random(-0.2, 0.2);
+    this.radius = random(1.5, 3);
+    this.alpha = random(0.5, 1);
+    this.decay = random(0.001, 0.003);
+    this.color = createColor();
   }
-}
-
-let phase = 'float';
-let timer = 0;
-
-function drawBackground(){
-  ctx.fillStyle = 'black';
-  ctx.fillRect(0,0,width,height);
-}
-
-function drawParticles(){
-  drawBackground();
-
-  // Hintergrund-Sterne
-  for(let i=0;i<6;i++){
-    const sx = random(0,width);
-    const sy = random(0,height);
-    const sr = random(0.3,1.2);
-    const sa = random(0.2,0.5);
-    ctx.beginPath();
-    ctx.arc(sx,sy,sr,0,Math.PI*2);
-    ctx.fillStyle = `rgba(255,255,255,${sa})`;
-    ctx.fill();
-  }
-
-  for(let p of particles){
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-    ctx.fillStyle = p.color + p.alpha + ')';
-    ctx.shadowBlur = 15 + 10*p.alpha;
-    ctx.shadowColor = 'rgba(255,255,255,'+p.alpha+')';
-    ctx.fill();
-
-    // Bewegung
-    if(phase==='float'){
-      p.vx += random(-0.008,0.008);
-      p.vy += random(-0.008,0.008);
-      p.x += p.vx;
-      p.y += p.vy;
-
-      if(p.x<0||p.x>width) p.vx*=-1;
-      if(p.y<0||p.y>height) p.vy*=-1;
-    }
-    else if(phase==='gather'){
-      p.x += (center.x - p.x)*0.03;
-      p.y += (center.y - p.y)*0.03;
-      p.alpha = Math.min(p.alpha+0.01,1);
-    }
-    else if(phase==='explode'){
-      const angle = Math.atan2(p.y-center.y, p.x-center.x);
-      const swirl = 0.05;
-      const speed = random(1.5,3);
-      p.x += Math.cos(angle+swirl)*speed + random(-0.2,0.2);
-      p.y += Math.sin(angle+swirl)*speed + random(-0.2,0.2);
-      p.alpha -= p.decay*1.5;
-
-      if(p.alpha<=0){
-        const a = random(0,Math.PI*2);
-        const r = random(width/3,width/2);
-        p.x = center.x + Math.cos(a)*r;
-        p.y = center.y + Math.sin(a)*r;
-        p.alpha = random(0.5,1);
-        p.radius = random(1.5,3);
-
-        const hues = [0,210,230,240];
-        const hue = hues[Math.floor(random(0,hues.length))];
-        const sat = random(50,100);
-        const light = random(70,100);
-        p.color = `hsla(${hue},${sat}%,${light}%,`;
+  update(phase) {
+    if (phase === CONFIG.phases.FLOAT) {
+      this.vx += random(-0.008,0.008);
+      this.vy += random(-0.008,0.008);
+      this.x += this.vx;
+      this.y += this.vy;
+      if(this.x<0||this.x>width) this.vx*=-1;
+      if(this.y<0||this.y>height)this.vy*=-1;
+    } else if(phase===CONFIG.phases.GATHER) {
+      this.x+=(center.x-this.x)*0.03;
+      this.y+=(center.y-this.y)*0.03;
+      this.alpha=Math.min(this.alpha+0.01,1);
+    } else if(phase===CONFIG.phases.EXPLODE) {
+      const angle=Math.atan2(this.y-center.y,this.x-center.x);
+      const swirl=0.05,speed=random(1.5,3);
+      this.x+=Math.cos(angle+swirl)*speed+random(-0.2,0.2);
+      this.y+=Math.sin(angle+swirl)*speed+random(-0.2,0.2);
+      this.alpha-=this.decay*1.5;
+      if(this.alpha<=0){
+        const a=random(0,Math.PI*2);
+        const r=random(width/3,width/2);
+        this.x=center.x+Math.cos(a)*r;
+        this.y=center.y+Math.sin(a)*r;
+        this.alpha=random(0.5,1);
+        this.radius=random(1.5,3);
+        this.color=createColor();
       }
     }
   }
+  draw(){
+    ctx.beginPath();
+    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+    ctx.fillStyle=this.color+this.alpha+')';
+    ctx.shadowBlur=15+10*this.alpha;
+    ctx.shadowColor=`rgba(255,255,255,${this.alpha})`;
+    ctx.fill();
+  }
 }
+
+const particles=Array.from({length:CONFIG.particleCount},()=>new Particle());
+let phase=CONFIG.phases.FLOAT,timer=0;
+
+const drawBackground=()=>{ctx.fillStyle='#000';ctx.fillRect(0,0,width,height);}
+const drawStars=()=>{for(let i=0;i<CONFIG.starCount;i++){ctx.beginPath();const sx=random(0,width);const sy=random(0,height);const sr=random(0.3,1.2);const sa=random(0.2,0.5);ctx.arc(sx,sy,sr,0,Math.PI*2);ctx.fillStyle=`rgba(255,255,255,${sa})`;ctx.fill();}}
 
 function animate(){
-  drawParticles();
-  requestAnimationFrame(animate);
-
+  drawBackground(); drawStars();
+  for(let p of particles){p.update(phase);p.draw();}
   timer++;
-  if(timer % 1500 === 0) phase='gather';
-  if(timer % 1500 === 500) phase='explode';
-  if(timer % 1500 === 1000) phase='float';
+  if(timer%1500===0) phase=CONFIG.phases.GATHER;
+  if(timer%1500===500) phase=CONFIG.phases.EXPLODE;
+  if(timer%1500===1000) phase=CONFIG.phases.FLOAT;
+  requestAnimationFrame(animate);
 }
 
-window.addEventListener('resize', ()=>{
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-  center.x = width/2;
-  center.y = height/2;
+window.addEventListener('resize',()=>{
+  width=canvas.width=window.innerWidth;
+  height=canvas.height=window.innerHeight;
+  center.x=width/2;
+  center.y=height/2;
 });
 
-createParticles();
 animate();
