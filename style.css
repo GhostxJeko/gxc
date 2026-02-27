@@ -1,13 +1,15 @@
+/* Allgemein */
 body, html {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: 'Orbitron', sans-serif;
-  overflow: hidden;
-  background: transparent;
+  overflow-x: hidden;
+  background: transparent; /* Canvas sichtbar */
   color: #fff;
 }
 
+/* Container */
 .container {
   position: relative;
   z-index: 2;
@@ -18,13 +20,13 @@ body, html {
   min-height: 200vh;
 }
 
+/* Header */
 header h1 {
   font-size: 3em;
   color: #ff7f00;
   text-shadow: 0 0 12px #ff7f00, 0 0 24px rgba(255,127,0,0.8);
   margin-bottom: 20px;
 }
-
 header p {
   font-size: 1.2em;
   max-width: 700px;
@@ -34,6 +36,7 @@ header p {
   text-shadow: 0 0 6px rgba(255,160,77,0.6);
 }
 
+/* ================== Feature-Boxen Neon High-End ================== */
 .features {
   display: flex;
   flex-wrap: wrap;
@@ -43,44 +46,43 @@ header p {
 }
 
 .feature {
-  background: rgba(20,20,20,0.6);
-  padding: 50px;
+  background: rgba(20, 20, 20, 0.6); /* leicht transparent */
+  padding: 30px;
   border-radius: 25px;
-  max-width: 320px;
-  min-height: 300px;
-  box-shadow:
-    0 0 20px rgba(255,127,0,0.9),
-    0 0 40px rgba(255,127,0,0.6),
+  width: 280px; /* kleinere Boxen */
+  box-shadow: 
+    0 0 20px rgba(255,127,0,0.9), 
+    0 0 40px rgba(255,127,0,0.6), 
     0 0 60px rgba(255,127,0,0.3);
   border: 2px solid rgba(255,127,0,0.5);
   transition: transform 0.4s ease, box-shadow 0.4s ease;
-  position: relative;
 }
 
 .feature:hover {
   transform: translateY(-15px) scale(1.05);
-  box-shadow:
-    0 0 70px rgba(255,127,0,1),
-    0 0 120px rgba(255,127,0,0.7),
+  box-shadow: 
+    0 0 70px rgba(255,127,0,1), 
+    0 0 120px rgba(255,127,0,0.7), 
     0 0 150px rgba(255,127,0,0.4);
 }
 
 .feature h2 {
   color: #ff7f00;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   text-shadow: 0 0 12px #ff7f00, 0 0 24px rgba(255,127,0,0.8);
+  font-size: 1.5rem;
 }
 
 .feature p {
   color: #ffa64d;
-  font-size: 1em;
-  line-height: 1.5;
+  font-size: 1rem;
+  line-height: 1.4;
   text-shadow: 0 0 6px rgba(255,160,77,0.6);
 }
 
+/* CTA */
 .cta-button {
-  display: inline-block;
-  padding: 20px 50px;
+  padding: 20px 40px;
   background: #ff7f00;
   color: #fff;
   text-decoration: none;
@@ -89,9 +91,7 @@ header p {
   font-size: 1.2em;
   transition: 0.3s;
   text-shadow: 0 0 10px #ff7f00;
-  margin-bottom: 80px;
 }
-
 .cta-button:hover {
   background: #ffa64d;
   color: black;
@@ -99,12 +99,14 @@ header p {
   box-shadow: 0 0 20px #ff7f00;
 }
 
+/* Footer */
 footer {
   margin-top: 60px;
   font-size: 0.9em;
   color: #888;
 }
 
+/* Canvas Background */
 #bgCanvas {
   position: fixed;
   top: 0;
@@ -115,41 +117,41 @@ footer {
   pointer-events: none;
 }
 
-html, body {
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
+/* BTC Box */
 #btc-box {
   margin-top: 160px;
   margin-bottom: 150px;
   text-align: center;
 }
-
 #btc-box h2 {
   color: #fff;
   font-size: 2.2rem;
   letter-spacing: 1px;
-  margin-bottom: 15px;
+  margin-bottom: 35px;
   text-shadow: 0 0 15px #F7931A, 0 0 30px rgba(247,147,26,0.6);
 }
-
 #btc-price {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: bold;
   color: #F7931A;
   transition: all 0.4s ease;
   text-shadow: 0 0 20px #F7931A, 0 0 40px rgba(247,147,26,0.5);
 }
 
+/* Scroll Fade-in */
 .fade-in {
   opacity: 0;
   transform: translateY(25px);
   transition: opacity 0.8s ease, transform 0.8s ease, text-shadow 0.8s ease;
 }
-
 .fade-in.visible {
   opacity: 1;
   transform: translateY(0);
   text-shadow: 0 0 10px rgba(255,127,0,0.5);
+}
+
+/* Scrollbar */
+html, body {
+  overflow-y: auto;
+  overflow-x: hidden;
 }
