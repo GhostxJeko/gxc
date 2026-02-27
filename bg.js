@@ -14,7 +14,7 @@ const CONFIG = {
 
 const random = (min,max)=>Math.random()*(max-min)+min;
 const randomHue = ()=>CONFIG.hues[Math.floor(random(0,CONFIG.hues.length))];
-const createColor = ()=>`hsla(${randomHue()},${random(50,100)}%,${random(70,90)}%,`;
+const createColor = ()=>`hsla(${randomHue()},${random(50,100)}%,${random(70,100)}%,`;
 
 class Particle {
   constructor(){ this.reset(); }
@@ -64,11 +64,12 @@ const particles=Array.from({length:CONFIG.particleCount},()=>new Particle());
 let phase=CONFIG.phases.FLOAT;
 let timer=0;
 
-function drawBackground(){
-  ctx.clearRect(0,0,width,height);
-}
+const drawBackground=()=>{
+  ctx.fillStyle='#000'; // schwarzer Hintergrund, kein Weiß mehr
+  ctx.fillRect(0,0,width,height);
+};
 
-function drawStars(){
+const drawStars=()=>{
   for(let i=0;i<CONFIG.starCount;i++){
     ctx.beginPath();
     const sx=random(0,width);
@@ -79,7 +80,7 @@ function drawStars(){
     ctx.fillStyle=`rgba(255,255,255,${sa})`;
     ctx.fill();
   }
-}
+};
 
 function animate(){
   drawBackground();
