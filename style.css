@@ -4,9 +4,9 @@ body, html {
   padding: 0;
   height: 100%;
   font-family: 'Orbitron', sans-serif;
-  overflow-x: hidden;
-  background: #000;
+  background: transparent;
   color: #fff;
+  overflow-x: hidden;
 }
 
 /* Container */
@@ -15,7 +15,7 @@ body, html {
   z-index: 2;
   text-align: center;
   padding: 50px 20px;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   min-height: 200vh;
 }
@@ -29,8 +29,8 @@ header h1 {
 }
 
 header p {
-  font-size: 1.2em;
-  max-width: 800px;
+  font-size: 1.1em;
+  max-width: 700px;
   margin: 0 auto 50px auto;
   line-height: 1.5;
   color: #ffa64d;
@@ -39,15 +39,15 @@ header p {
 
 /* Bitcoin Box */
 #btc-box {
-  margin: 50px 0;
+  margin: 60px 0 80px 0;
   text-align: center;
 }
 
 #btc-box h2 {
-  font-size: 2.2rem;
+  font-size: 2rem;
   color: #fff;
-  text-shadow: 0 0 15px #F7931A, 0 0 30px rgba(247,147,26,0.6);
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  text-shadow: 0 0 12px #F7931A, 0 0 24px rgba(247,147,26,0.6);
 }
 
 #btc-price {
@@ -55,7 +55,7 @@ header p {
   font-weight: bold;
   color: #F7931A;
   text-shadow: 0 0 20px #F7931A, 0 0 40px rgba(247,147,26,0.5);
-  transition: all 0.4s ease;
+  margin-top: -10px; /* hebt Preis etwas nach oben */
 }
 
 /* Features */
@@ -63,16 +63,16 @@ header p {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 30px;
+  gap: 25px;
   margin-bottom: 50px;
 }
 
 .feature {
-  background: rgba(20,20,20,0.8);
-  padding: 40px;
+  background: rgba(20,20,20,0.6);
+  padding: 35px;
   border-radius: 25px;
   flex: 1 1 280px;
-  max-width: 350px;
+  max-width: 320px;
   box-shadow:
     0 0 20px rgba(255,127,0,0.9),
     0 0 40px rgba(255,127,0,0.6),
@@ -91,26 +91,27 @@ header p {
 
 .feature h2 {
   color: #ff7f00;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
+  font-size: 1.3em;
   text-shadow: 0 0 12px #ff7f00, 0 0 24px rgba(255,127,0,0.8);
 }
 
 .feature p {
   color: #ffa64d;
-  font-size: 1em;
+  font-size: 0.95em;
   line-height: 1.5;
   text-shadow: 0 0 6px rgba(255,160,77,0.6);
 }
 
 /* CTA Button */
 .cta-button {
-  padding: 20px 45px;
+  padding: 18px 40px;
   background: #ff7f00;
   color: #fff;
   text-decoration: none;
   font-weight: bold;
   border-radius: 12px;
-  font-size: 1.3em;
+  font-size: 1.2em;
   transition: 0.3s;
   text-shadow: 0 0 10px #ff7f00;
 }
