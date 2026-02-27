@@ -1,4 +1,6 @@
-// bg.js – Kosmischer Lichtball + Explosion + Strudel – finale Version
+// ================================
+// Ghost-X Cosmic Background Final
+// ================================
 const canvas = document.getElementById("bgCanvas");
 const ctx = canvas.getContext("2d");
 
@@ -7,145 +9,154 @@ let height = canvas.height = window.innerHeight;
 let centerX = width / 2;
 let centerY = height / 2;
 
-const particles = [];
-const MAX_COUNT = 150;
-const START_COUNT = 50;
-const hueOptions = [210, 220, 230, 240];
-
-function rand(min, max) { return Math.random()*(max-min)+min; }
-
-// Partikel erstellen
-function createParticles(){
-    particles.length = 0;
-    for(let i=0;i<MAX_COUNT;i++){
-        const hue = hueOptions[Math.floor(rand(0,hueOptions.length))];
-        // Alle Partikel starten **außerhalb der Mitte**
-        const x = rand(0, width);
-        const y = rand(0, height);
-        particles.push({
-            x:x,
-            y:y,
-            vx:0,
-            vy:0,
-            radius:rand(1.5,3),
-            alpha: i<START_COUNT?rand(0.6,1):0,
-            active: i<START_COUNT,
-            hue:hue,
-            exploded:false
-        });
-    }
-}
-
-// Resize Handler
-function resize(){
+window.addEventListener("resize", () => {
     width = canvas.width = window.innerWidth;
     height = canvas.height = window.innerHeight;
-    centerX = width/2;
-    centerY = height/2;
+    centerX = width / 2;
+    centerY = height / 2;
+});
+
+// ================================
+// PARTICLE SETTINGS
+// ================================
+const particles = [];
+const MAX_COUNT = 150;
+const colors = [210, 220, 230, 240];
+
+function rand(min, max) {
+    return Math.random() * (max - min) + min;
 }
-window.addEventListener("resize", resize);
 
-let phase="float";
-let timer=0;
+for (let i = 0; i < MAX_COUNT; i++) {
+    particles.push({
+        x: rand(0, width),
+        y: rand(0, height),
+        vx: rand(-1.5, 1.5),
+        vy: rand(-1.5, 1.5),
+        radius: rand(1.5, 3),
+        alpha: rand(0.6, 1),
+        hue: colors[Math.floor(rand(0, colors.length))],
+        exploded: false
+    });
+}
 
-function drawParticles(){
-    ctx.clearRect(0,0,width,height);
+// ================================
+// ANIMATION PHASES
+// ================================
+let phase = "float";
+let timer = 0;
 
-    particles.forEach(p=>{
-        if(!p.active) return;
+// ================================
+// DRAW BACKGROUND
+// ================================
+function drawBackground() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, width, height);
+}
 
-        // Draw
-        ctx.beginPath();
-        ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-        ctx.fillStyle=`hsla(${p.hue},90%,75%,${p.alpha})`;
-        ctx.shadowBlur=15*p.alpha;
-        ctx.shadowColor=`hsla(${p.hue},90%,80%,${p.alpha})`;
-        ctx.fill();
+// ================================
+// UPDATE PARTICLES
+// ================================
+function updateParticles() {
+    particles.forEach(p => {
 
-        // FLOAT
-        if(phase==="float"){
-            p.x += p.vx; p.y += p.vy;
-            if(p.x<0||p.x>width)p.vx*=-1;
-            if(p.y<0||p.y>height)p.vy*=-1;
-        }
-
-        // GATHER – Partikel bewegen sich zur Mitte → Lichtball
-        else if(phase==="gather"){
-            const dx=centerX-p.x;
-            const dy=centerY-p.y;
-            p.vx = dx*0.05;
-            p.vy = dy*0.05;
+        // FLOAT – freie Bewegung
+        if (phase === "float") {
             p.x += p.vx;
             p.y += p.vy;
-            // Alpha puls
-            p.alpha += (1-p.alpha)*0.05;
+            p.vx += rand(-0.05, 0.05);
+            p.vy += rand(-0.05, 0.05);
+            p.vx *= 0.98;
+            p.vy *= 0.98;
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height;
+            if (p.y > height) p.y = 0;
         }
 
-        // EXPLODE – Partikel fliegen nach außen
-        else if(phase==="explode"){
-            if(!p.exploded){
-                const angle = rand(0,Math.PI*2);
-                const speed = rand(2.5,5);
-                p.vx = Math.cos(angle)*speed;
-                p.vy = Math.sin(angle)*speed;
-                p.exploded=true;
+        // GATHER – ziehen zum Zentrum (Lichtball)
+        else if (phase === "gather") {
+            const dx = centerX - p.x;
+            const dy = centerY - p.y;
+            p.vx = dx * 0.05;
+            p.vy = dy * 0.05;
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha += (1 - p.alpha) * 0.05;
+        }
+
+        // EXPLODE – nach außen
+        else if (phase === "explode") {
+            if (!p.exploded) {
+                const angle = rand(0, Math.PI * 2);
+                const speed = rand(2.5, 5);
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed;
+                p.exploded = true;
             }
             p.x += p.vx;
             p.y += p.vy;
             p.alpha -= 0.004;
-            if(p.alpha<=0){
-                p.x=centerX + rand(-20,20);
-                p.y=centerY + rand(-20,20);
-                p.alpha=rand(0.6,1);
-                p.exploded=false;
+
+            if (p.alpha <= 0) {
+                p.x = centerX + rand(-20, 20);
+                p.y = centerY + rand(-20, 20);
+                p.alpha = rand(0.6, 1);
+                p.exploded = false;
             }
         }
 
-        // SWIRL – Partikel rotieren um die Mitte
-        else if(phase==="swirl"){
-            const dx=p.x-centerX;
-            const dy=p.y-centerY;
-            const dist=Math.sqrt(dx*dx+dy*dy);
-            const angle=Math.atan2(dy,dx)+0.06+Math.sin(timer*0.01)*0.02;
-            const radius=dist*0.97;
+        // SWIRL – Strudel
+        else if (phase === "swirl") {
+            const dx = p.x - centerX;
+            const dy = p.y - centerY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) + 0.06 + Math.sin(timer * 0.01) * 0.02;
+            const radius = dist * 0.97;
 
-            p.x=centerX+Math.cos(angle)*radius;
-            p.y=centerY+Math.sin(angle)*radius;
+            p.x = centerX + Math.cos(angle) * radius;
+            p.y = centerY + Math.sin(angle) * radius;
 
-            p.x += (Math.random()-0.5)*1.5;
-            p.y += (Math.random()-0.5)*1.5;
+            p.x += (Math.random() - 0.5) * 1.5;
+            p.y += (Math.random() - 0.5) * 1.5;
 
             p.alpha -= 0.002;
-            if(p.alpha<=0){p.x=centerX;p.y=centerY;p.alpha=rand(0.6,1);}
+            if (p.alpha <= 0) {
+                p.x = centerX;
+                p.y = centerY;
+                p.alpha = rand(0.6, 1);
+            }
         }
+
+        // DRAW PARTICLE
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue}, 100%, 80%, ${p.alpha})`;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, 1)`;
+        ctx.fill();
     });
 }
 
-// Aktiviert alle Partikel für Strudel
-function activateMoreParticles(){
-    particles.forEach(p=>{
-        if(!p.active){
-            p.active=true;
-            p.x=centerX;
-            p.y=centerY;
-            p.alpha=rand(0.6,1);
-        }
-    });
-}
+// ================================
+// ANIMATE LOOP
+// ================================
+function animate() {
+    drawBackground();
+    updateParticles();
 
-// Animation Loop
-function animate(){
-    drawParticles();
     timer++;
 
-    if(timer===100) phase="gather";     // Lichtball bilden
-    if(timer===400) phase="explode";    // Explosion
-    if(timer===700){ activateMoreParticles(); phase="swirl"; } // Strudel
-    if(timer===1200){ phase="float"; timer=0; }               // Reset
+    if (timer === 300) phase = "gather";    // Lichtball bilden
+    if (timer === 600) phase = "explode";   // Explosion
+    if (timer === 950) phase = "swirl";     // Strudel
+    if (timer === 1500) {                    // Reset auf float
+        phase = "float";
+        timer = 0;
+    }
 
     requestAnimationFrame(animate);
 }
 
 // START
-createParticles();
-animate();  
+animate();
