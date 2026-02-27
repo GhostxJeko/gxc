@@ -107,4 +107,4 @@ window.addEventListener('resize', () => {
   center.y = height / 2;
 });
 
-animate();
+animate();  
