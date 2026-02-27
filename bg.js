@@ -1,5 +1,5 @@
 // ================================
-// Ghost-X Cosmic Background v1.0
+// Ghost-X Cosmic Background Final
 // ================================
 
 const canvas = document.getElementById("bgCanvas");
@@ -22,7 +22,8 @@ window.addEventListener("resize", () => {
 // ================================
 
 const particles = [];
-const MAX_COUNT = 180;
+const MAX_COUNT = 150; // Partikelanzahl
+const colors = [210, 220, 230, 240]; // blau/weiß Töne
 
 function rand(min, max) { return Math.random() * (max - min) + min; }
 
@@ -30,11 +31,11 @@ for (let i = 0; i < MAX_COUNT; i++) {
     particles.push({
         x: rand(0, width),
         y: rand(0, height),
-        vx: rand(-2, 2),
-        vy: rand(-2, 2),
-        radius: rand(1.2, 2.8),
+        vx: rand(-1.5, 1.5),
+        vy: rand(-1.5, 1.5),
+        radius: rand(1.5, 3),
         alpha: rand(0.6, 1),
-        hue: Math.random() < 0.5 ? 210 : 240, // blau oder weiß
+        hue: colors[Math.floor(rand(0, colors.length))],
         exploded: false
     });
 }
@@ -47,58 +48,52 @@ let phase = "float";
 let timer = 0;
 
 // ================================
-// BACKGROUND DRAW
+// DRAW BACKGROUND
 // ================================
+
 function drawBackground() {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, width, height);
 }
 
 // ================================
-// PARTICLE UPDATE
+// UPDATE PARTICLES
 // ================================
+
 function updateParticles() {
     particles.forEach(p => {
-        // -------------------
-        // FLOAT PHASE
-        // -------------------
+        // FLOAT – freie Bewegung
         if (phase === "float") {
             p.x += p.vx;
             p.y += p.vy;
             p.vx += rand(-0.05, 0.05);
             p.vy += rand(-0.05, 0.05);
-            p.vx *= 0.99;
-            p.vy *= 0.99;
-
+            p.vx *= 0.98;
+            p.vy *= 0.98;
             if (p.x < 0) p.x = width;
             if (p.x > width) p.x = 0;
             if (p.y < 0) p.y = height;
             if (p.y > height) p.y = 0;
         }
 
-        // -------------------
-        // GATHER PHASE – Lichtball
-        // -------------------
+        // GATHER – ziehen zum Zentrum (Lichtball)
         else if (phase === "gather") {
-            p.x += (centerX - p.x) * 0.08;
-            p.y += (centerY - p.y) * 0.08;
+            p.x += (centerX - p.x) * 0.06;
+            p.y += (centerY - p.y) * 0.06;
         }
 
-        // -------------------
-        // EXPLODE PHASE
-        // -------------------
+        // EXPLODE – nach außen
         else if (phase === "explode") {
             if (!p.exploded) {
-                const angle = rand(0, Math.PI * 2);
-                const speed = rand(2.5, 5);
-                p.vx = Math.cos(angle) * speed;
-                p.vy = Math.sin(angle) * speed;
+                const angle = rand(0, Math.PI*2);
+                const speed = rand(2, 4);
+                p.vx = Math.cos(angle)*speed;
+                p.vy = Math.sin(angle)*speed;
                 p.exploded = true;
             }
             p.x += p.vx;
             p.y += p.vy;
             p.alpha -= 0.004;
-
             if (p.alpha <= 0) {
                 p.x = centerX;
                 p.y = centerY;
@@ -107,24 +102,56 @@ function updateParticles() {
             }
         }
 
-        // -------------------
-        // SWIRL PHASE – Black Hole
-        // -------------------
+        // SWIRL – Strudel mit Gravitation
         else if (phase === "swirl") {
             const dx = p.x - centerX;
             const dy = p.y - centerY;
             const dist = Math.sqrt(dx*dx + dy*dy);
 
             // Rotation
-            const angle = Math.atan2(dy, dx) + 0.25;
+            const angle = Math.atan2(dy, dx) + 0.08;
 
             // Anziehung
-            const pull = 0.08;
+            const pull = 0.04;
             const newDist = dist * (1 - pull);
 
             p.x = centerX + Math.cos(angle) * newDist;
             p.y = centerY + Math.sin(angle) * newDist;
 
             // leichte Gravitation auf Zentrum
-            p.x += (centerX - p.x) * 0.02;
-            p.y += (centerY - p
+            p.x += (centerX - p.x) * 0.01;
+            p.y += (centerY - p.y) * 0.01;
+        }
+
+        // DRAW PARTICLE
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
+        ctx.fillStyle = `hsla(${p.hue}, 100%, 80%, ${p.alpha})`;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = `hsla(${p.hue}, 100%, 70%, 1)`;
+        ctx.fill();
+    });
+}
+
+// ================================
+// ANIMATE LOOP
+// ================================
+
+function animate() {
+    drawBackground();
+    updateParticles();
+
+    timer++;
+
+    if (timer === 300) phase = "gather";     // Lichtball bilden
+    if (timer === 600) phase = "explode";    // Explosion
+    if (timer === 950) phase = "swirl";      // Strudel
+    if (timer === 1500) {                    // Reset auf float
+        phase = "float";
+        timer = 0;
+    }
+
+    requestAnimationFrame(animate);
+}
+
+animate();
