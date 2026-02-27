@@ -1,123 +1,106 @@
-// bg.js – Schwarzes/blaues Universum mit weißen/blauen Partikeln, Lichtball, Explosion & Strudel
-const canvas = document.getElementById("bgCanvas");
-const ctx = canvas.getContext("2d");
+// bg.js – Kosmisches Universum: Weiß/blau Partikel, Lichtball, Explosion, Strudel
+const canvas = document.getElementById('bgCanvas');
+const ctx = canvas.getContext('2d');
 
 let width = canvas.width = window.innerWidth;
 let height = canvas.height = window.innerHeight;
-let centerX = width / 2;
-let centerY = height / 2;
+const center = { x: width/2, y: height/2 };
 
+const particleCount = 200;
 const particles = [];
-const START_COUNT = 60;
-const MAX_COUNT = 160;
 
-// nur Weiß & Blau
-const hueOptions = [210, 220, 230, 240, 0]; // 0=Weiß
-
-function rand(min,max){return Math.random()*(max-min)+min;}
+function random(min,max){ return Math.random()*(max-min)+min; }
 
 function createParticles(){
   particles.length = 0;
-  for(let i=0;i<MAX_COUNT;i++){
-    const hue = hueOptions[Math.floor(rand(0,hueOptions.length))];
+  for(let i=0;i<particleCount;i++){
+    const hues = [0,210,230,240]; // Weiß + Blau
+    const hue = hues[Math.floor(random(0,hues.length))];
+    const sat = random(50,100);
+    const light = random(70,100);
     particles.push({
-      x: rand(0,width),
-      y: rand(0,height),
-      vx: rand(-0.15,0.15),
-      vy: rand(-0.15,0.15),
-      radius: rand(1.2,2.4),
-      alpha: i<START_COUNT?rand(0.6,1):0,
-      active: i<START_COUNT,
-      hue: hue,
-      exploded: false
+      x: random(0,width),
+      y: random(0,height),
+      vx: random(-0.2,0.2),
+      vy: random(-0.2,0.2),
+      radius: random(1.5,3),
+      alpha: random(0.5,1),
+      decay: random(0.001,0.003),
+      color: `hsla(${hue},${sat}%,${light}%,`,
     });
   }
 }
 
-let phase = "float";
+let phase = 'float';
 let timer = 0;
 
-window.addEventListener("resize", ()=>{
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-  centerX = width / 2;
-  centerY = height / 2;
-});
-
 function drawBackground(){
-  ctx.fillStyle="black";
+  ctx.fillStyle = 'black';
   ctx.fillRect(0,0,width,height);
 }
 
 function drawParticles(){
   drawBackground();
-  particles.forEach(p=>{
-    if(!p.active) return;
 
+  // Hintergrund-Sterne
+  for(let i=0;i<6;i++){
+    const sx = random(0,width);
+    const sy = random(0,height);
+    const sr = random(0.3,1.2);
+    const sa = random(0.2,0.5);
+    ctx.beginPath();
+    ctx.arc(sx,sy,sr,0,Math.PI*2);
+    ctx.fillStyle = `rgba(255,255,255,${sa})`;
+    ctx.fill();
+  }
+
+  for(let p of particles){
     ctx.beginPath();
     ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-    ctx.fillStyle=`hsla(${p.hue},90%,75%,${p.alpha})`;
-    ctx.shadowBlur=20;
-    ctx.shadowColor=`hsla(${p.hue},90%,75%,${p.alpha})`;
+    ctx.fillStyle = p.color + p.alpha + ')';
+    ctx.shadowBlur = 15 + 10*p.alpha;
+    ctx.shadowColor = 'rgba(255,255,255,'+p.alpha+')';
     ctx.fill();
 
-    if(phase==="float"){
-      p.x+=p.vx;
-      p.y+=p.vy;
+    // Bewegung
+    if(phase==='float'){
+      p.vx += random(-0.008,0.008);
+      p.vy += random(-0.008,0.008);
+      p.x += p.vx;
+      p.y += p.vy;
+
       if(p.x<0||p.x>width) p.vx*=-1;
       if(p.y<0||p.y>height) p.vy*=-1;
     }
-    else if(phase==="gather"){
-      p.x+=(centerX-p.x)*0.08;
-      p.y+=(centerY-p.y)*0.08;
+    else if(phase==='gather'){
+      p.x += (center.x - p.x)*0.03;
+      p.y += (center.y - p.y)*0.03;
+      p.alpha = Math.min(p.alpha+0.01,1);
     }
-    else if(phase==="explode"){
-      if(!p.exploded){
-        const angle=Math.random()*Math.PI*2;
-        const speed=rand(2,5);
-        p.vx=Math.cos(angle)*speed;
-        p.vy=Math.sin(angle)*speed;
-        p.exploded=true;
-      }
-      p.x+=p.vx;
-      p.y+=p.vy;
-      p.alpha-=0.004;
-      if(p.alpha<=0){
-        p.x=centerX;
-        p.y=centerY;
-        p.alpha=rand(0.6,1);
-        p.exploded=false;
-      }
-    }
-    else if(phase==="swirl"){
-      const dx=p.x-centerX;
-      const dy=p.y-centerY;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      let angle=Math.atan2(dy,dx)+0.05;
-      let radius=dist*0.97;
-      p.x=centerX+Math.cos(angle)*radius;
-      p.y=centerY+Math.sin(angle)*radius;
-      p.x+=(Math.random()-0.5)*1.5;
-      p.y+=(Math.random()-0.5)*1.5;
-      p.alpha-=0.002;
-      if(p.alpha<=0){
-        p.x=centerX;
-        p.y=centerY;
-        p.alpha=rand(0.6,1);
-      }
-    }
-  });
-}
+    else if(phase==='explode'){
+      const angle = Math.atan2(p.y-center.y, p.x-center.x);
+      const swirl = 0.05;
+      const speed = random(1.5,3);
+      p.x += Math.cos(angle+swirl)*speed + random(-0.2,0.2);
+      p.y += Math.sin(angle+swirl)*speed + random(-0.2,0.2);
+      p.alpha -= p.decay*1.5;
 
-function activateMoreParticles(){
-  particles.forEach(p=>{
-    if(!p.active){
-      p.active=true;
-      p.x=centerX;
-      p.y=centerY;
-      p.alpha=rand(0.6,1);
+      if(p.alpha<=0){
+        const a = random(0,Math.PI*2);
+        const r = random(width/3,width/2);
+        p.x = center.x + Math.cos(a)*r;
+        p.y = center.y + Math.sin(a)*r;
+        p.alpha = random(0.5,1);
+        p.radius = random(1.5,3);
+
+        const hues = [0,210,230,240];
+        const hue = hues[Math.floor(random(0,hues.length))];
+        const sat = random(50,100);
+        const light = random(70,100);
+        p.color = `hsla(${hue},${sat}%,${light}%,`;
+      }
     }
-  });
+  }
 }
 
 function animate(){
@@ -125,11 +108,17 @@ function animate(){
   requestAnimationFrame(animate);
 
   timer++;
-  if(timer===400) phase="gather";
-  if(timer===650) phase="explode";
-  if(timer===950){ activateMoreParticles(); phase="swirl"; }
-  if(timer===1500){ phase="float"; timer=0; }
+  if(timer % 1500 === 0) phase='gather';
+  if(timer % 1500 === 500) phase='explode';
+  if(timer % 1500 === 1000) phase='float';
 }
+
+window.addEventListener('resize', ()=>{
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  center.x = width/2;
+  center.y = height/2;
+});
 
 createParticles();
 animate();
