@@ -1,4 +1,4 @@
-// bg.js – Professioneller Kosmos-Strudel mit Lichtkugel & Tunnel-Effekt
+// bg.js – Kosmos-Strudel mit Lichtkugel & Tunnel-Effekt (überarbeitet)
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -7,16 +7,16 @@ let height = canvas.height = window.innerHeight;
 const center = { x: width/2, y: height/2 };
 
 const CONFIG = {
-  initialParticleCount: 8,    // wenige Partikel am Anfang
-  totalParticleCount: 220,    // volle Dichte nach Lichtkugel
-  hues: [210, 0],             // Blau & Weiß
+  initialParticleCount: 8,
+  totalParticleCount: 220,
+  hues: [210, 0], // Blau & Weiß
   phases: { FLOAT:'float', GATHER:'gather', EXPLODE:'explode' },
   gatherRadius: 100,
   swirlSpeed: 0.03,
   explodeSpeed: 2,
   glowBlur: 25,
-  trailAlpha: 0.12,           // für sanften Tunnel-Effekt
-  trailLength: 5
+  trailAlpha: 0.05, // Transparenter Hintergrund für Tunnel-Effekt
+  trailLength: 6
 };
 
 const random = (min,max)=>Math.random()*(max-min)+min;
@@ -80,8 +80,7 @@ class Particle {
       if(this.alpha <= 0) this.reset(false);
     }
 
-    // Trail speichern
-    this.trail.push({x:this.x,y:this.y,alpha:this.alpha});
+    this.trail.push({x:this.x, y:this.y, alpha:this.alpha});
     if(this.trail.length>CONFIG.trailLength) this.trail.shift();
   }
 
@@ -89,7 +88,7 @@ class Particle {
     for(let i=0;i<this.trail.length;i++){
       const t = this.trail[i];
       ctx.beginPath();
-      ctx.arc(t.x,t.y,this.radius*(i/CONFIG.trailLength +0.3),0,Math.PI*2);
+      ctx.arc(t.x, t.y, this.radius*(i/CONFIG.trailLength +0.3), 0, Math.PI*2);
       ctx.fillStyle = this.color + t.alpha*(i/CONFIG.trailLength +0.3) + ')';
       ctx.shadowBlur = CONFIG.glowBlur*(i/CONFIG.trailLength +0.3);
       ctx.shadowColor = `rgba(255,255,255,${t.alpha*(i/CONFIG.trailLength +0.3)})`;
@@ -97,7 +96,7 @@ class Particle {
     }
 
     ctx.beginPath();
-    ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
+    ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
     ctx.fillStyle = this.color + this.alpha + ')';
     ctx.shadowBlur = CONFIG.glowBlur;
     ctx.shadowColor = `rgba(255,255,255,${this.alpha})`;
@@ -112,7 +111,7 @@ let phase = CONFIG.phases.FLOAT;
 let timer = 0;
 
 const drawBackground = ()=>{
-  ctx.fillStyle = `rgba(0,0,0,${CONFIG.trailAlpha})`;
+  ctx.fillStyle = `rgba(0,0,0,${CONFIG.trailAlpha})`; // Sanft transparent
   ctx.fillRect(0,0,width,height);
 };
 
@@ -120,9 +119,25 @@ function animate(){
   drawBackground();
   particles.forEach(p=>{ p.update(phase); p.draw(); });
 
-  // Volle Partikel nach sanftem Start
   if(!extraParticlesAdded && timer>200){
     const more = Array.from({length: CONFIG.totalParticleCount - CONFIG.initialParticleCount}, ()=>new Particle());
     particles = particles.concat(more);
     extraParticlesAdded = true;
   }
+
+  timer++;
+  if(timer%3000===0) phase=CONFIG.phases.GATHER;
+  if(timer%3000===1500) phase=CONFIG.phases.EXPLODE;
+  if(timer%3000===2500) phase=CONFIG.phases.FLOAT;
+
+  requestAnimationFrame(animate);
+}
+
+window.addEventListener('resize', ()=>{
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  center.x = width/2;
+  center.y = height/2;
+});
+
+animate();
