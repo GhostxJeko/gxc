@@ -22,9 +22,9 @@ window.addEventListener("resize", () => {
 const particles = [];
 const MAX_COUNT = 200;
 const START_COUNT = 50;
-const colorHue = 140; // Neon-Grün, für weiß: 0/0/100 Lightness anpassen
+const neonHue = 140; // Neon Grün, für weiß z.B. 0/0/100 Lightness
 
-function rand(min,max){ return Math.random()*(max-min)+min; }
+function rand(min, max){ return Math.random()*(max-min)+min; }
 
 // Partikel erzeugen
 for(let i=0;i<MAX_COUNT;i++){
@@ -58,9 +58,9 @@ function drawParticles(){
         // DRAW
         ctx.beginPath();
         ctx.arc(p.x,p.y,p.radius,0,Math.PI*2);
-        ctx.fillStyle = `hsla(${colorHue},100%,75%,${p.alpha})`;
+        ctx.fillStyle = `hsla(${neonHue},100%,75%,${p.alpha})`;
         ctx.shadowBlur = 15*p.alpha;
-        ctx.shadowColor = `hsla(${colorHue},100%,75%,${p.alpha})`;
+        ctx.shadowColor = `hsla(${neonHue},100%,75%,${p.alpha})`;
         ctx.fill();
 
         // FLOAT
@@ -109,15 +109,15 @@ function drawParticles(){
             const angle = Math.atan2(dy,dx)+0.08+Math.sin(timer*0.02)*0.03;
             const radius = dist*0.95;
 
-            // Partikel in Richtung Zentrum + leichte Rotation
+            // Partikel in Richtung Zentrum + Rotation
             p.x=centerX+Math.cos(angle)*radius;
             p.y=centerY+Math.sin(angle)*radius;
 
-            // zufällige kleine Variationen für organische Bewegung
+            // kleine Variationen für organische Bewegung
             p.x += (Math.random()-0.5)*2;
             p.y += (Math.random()-0.5)*2;
 
-            // Alpha leicht verringern, damit Partikel neu gestartet werden
+            // Alpha leicht verringern
             p.alpha -= 0.003;
             if(p.alpha<=0){p.x=centerX;p.y=centerY;p.alpha=rand(0.6,1);}
         }
@@ -143,7 +143,7 @@ function animate(){
     drawParticles();
     timer++;
 
-    if(timer===150) phase="gather";       // Lichtball bilden
+    if(timer===150) phase="gather";       // Lichtball
     if(timer===500) phase="explode";      // Explosion
     if(timer===900){ activateMoreParticles(); phase="swirl"; } // Strudel
     if(timer===1500){ phase="float"; timer=0; }               // Reset
