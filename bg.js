@@ -1,5 +1,5 @@
 // ================================
-// Ghost-X Cosmic Background Optimized
+// Ghost-X Cosmic Background – Final Optimized
 // ================================
 
 const canvas = document.getElementById("bgCanvas");
@@ -21,8 +21,8 @@ window.addEventListener("resize", () => {
 // PARTICLE SETTINGS
 // ================================
 const particles = [];
-const MAX_COUNT = 150;       // maximale Partikel
-const START_COUNT = 60;      // anfänglich aktive Partikel
+const MAX_COUNT = 150;    // maximale Partikel
+const START_COUNT = 60;   // anfänglich aktive Partikel
 const colors = [210, 220, 230, 240]; // blau/weiß Töne
 
 function rand(min, max) { return Math.random() * (max - min) + min; }
@@ -64,9 +64,7 @@ function updateParticles() {
 
         if (!p.active) return;
 
-        // -----------------
         // FLOAT – freie Bewegung
-        // -----------------
         if (phase === "float") {
             p.x += p.vx;
             p.y += p.vy;
@@ -81,14 +79,12 @@ function updateParticles() {
             if (p.y > height) p.y = 0;
         }
 
-        // -----------------
         // GATHER – Lichtball Kreis
-        // -----------------
         else if (phase === "gather") {
             const dx = p.x - centerX;
             const dy = p.y - centerY;
-            const angle = Math.atan2(dy, dx);
             const dist = Math.sqrt(dx*dx + dy*dy);
+            const angle = Math.atan2(dy, dx);
             const pull = 0.08;
 
             // Perfekter Kreis: Richtung zum Zentrum proportional
@@ -98,9 +94,7 @@ function updateParticles() {
             p.y -= moveY;
         }
 
-        // -----------------
         // EXPLODE – nach außen
-        // -----------------
         else if (phase === "explode") {
             if (!p.exploded) {
                 const angle = rand(0, Math.PI*2);
@@ -121,9 +115,7 @@ function updateParticles() {
             }
         }
 
-        // -----------------
-        // SWIRL – Strudel
-        // -----------------
+        // SWIRL – kontrollierter Strudel
         else if (phase === "swirl") {
             const dx = p.x - centerX;
             const dy = p.y - centerY;
@@ -135,14 +127,12 @@ function updateParticles() {
             p.x = centerX + Math.cos(angle) * newDist;
             p.y = centerY + Math.sin(angle) * newDist;
 
-            // leichte Gravitation auf Zentrum
+            // sanfte Gravitation zum Zentrum
             p.x += (centerX - p.x) * 0.01;
             p.y += (centerY - p.y) * 0.01;
         }
 
-        // -----------------
         // DRAW PARTICLE
-        // -----------------
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2);
         ctx.fillStyle = `hsla(${p.hue}, 100%, 80%, ${p.alpha})`;
