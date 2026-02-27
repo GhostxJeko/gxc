@@ -1,4 +1,4 @@
-// bg.js – High-End Kosmos-Strudel mit Tunnel- & Lichtkugel-Effekt
+// bg.js – Professioneller Kosmos-Strudel mit Lichtkugel & Tunnel-Effekt
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -7,20 +7,21 @@ let height = canvas.height = window.innerHeight;
 const center = { x: width/2, y: height/2 };
 
 const CONFIG = {
-  initialParticleCount: 8,   // wenige Partikel am Anfang
-  totalParticleCount: 220,   // volle Strudel-Dichte
-  hues: [210, 0],            // Blau & Weiß
+  initialParticleCount: 8,    // wenige Partikel am Anfang
+  totalParticleCount: 220,    // volle Dichte nach Lichtkugel
+  hues: [210, 0],             // Blau & Weiß
   phases: { FLOAT:'float', GATHER:'gather', EXPLODE:'explode' },
   gatherRadius: 100,
-  swirlSpeed: 0.04,
-  explodeSpeed: 2.2,
-  glowBlur: 40,
-  trailAlpha: 0.15           // Transparenter Hintergrund für Tunnel-Effekt
+  swirlSpeed: 0.03,
+  explodeSpeed: 2,
+  glowBlur: 25,
+  trailAlpha: 0.12,           // für sanften Tunnel-Effekt
+  trailLength: 5
 };
 
 const random = (min,max)=>Math.random()*(max-min)+min;
 const randomHue = ()=>CONFIG.hues[Math.floor(random(0,CONFIG.hues.length))];
-const createColor = ()=>`hsla(${randomHue()},80%,75%,`;
+const createColor = ()=>`hsla(${randomHue()},80%,85%,`;
 
 class Particle {
   constructor(initial=false){
@@ -38,21 +39,20 @@ class Particle {
       this.x = center.x + Math.cos(angle)*r;
       this.y = center.y + Math.sin(angle)*r;
     }
-    this.vx = random(-0.1,0.1);
-    this.vy = random(-0.1,0.1);
+    this.vx = random(-0.05,0.05);
+    this.vy = random(-0.05,0.05);
     this.radius = random(1.5,2.5);
-    this.alpha = random(0.5,0.9);
-    this.decay = random(0.001,0.0025);
+    this.alpha = random(0.5,0.85);
+    this.decay = random(0.001,0.002);
     this.color = createColor();
     this.angleOffset = random(0, Math.PI*2);
     this.trail = [];
   }
 
   update(phase){
-    // Partikelbewegung
     if(phase === CONFIG.phases.FLOAT){
-      this.vx += random(-0.003,0.003);
-      this.vy += random(-0.003,0.003);
+      this.vx += random(-0.002,0.002);
+      this.vy += random(-0.002,0.002);
       this.x += this.vx;
       this.y += this.vy;
       if(this.x<0||this.x>width) this.vx*=-1;
@@ -63,7 +63,7 @@ class Particle {
       const dy = center.y - this.y;
       const dist = Math.sqrt(dx*dx + dy*dy);
       const angle = Math.atan2(dy, dx) + this.angleOffset;
-      const swirl = 0.02 * dist; // sanfter Strudel-Effekt
+      const swirl = 0.02 * dist;
       this.x = center.x + Math.cos(angle + swirl)*Math.min(dist, CONFIG.gatherRadius);
       this.y = center.y + Math.sin(angle + swirl)*Math.min(dist, CONFIG.gatherRadius);
       this.alpha = Math.min(this.alpha + 0.02, 1);
@@ -73,33 +73,29 @@ class Particle {
       const dy = this.y - center.y;
       const angle = Math.atan2(dy, dx);
       const swirl = CONFIG.swirlSpeed;
-      const speed = random(CONFIG.explodeSpeed*0.6, CONFIG.explodeSpeed*1.3);
-      this.x += Math.cos(angle + swirl)*speed + random(-0.2,0.2);
-      this.y += Math.sin(angle + swirl)*speed + random(-0.2,0.2);
+      const speed = random(CONFIG.explodeSpeed*0.7, CONFIG.explodeSpeed*1.3);
+      this.x += Math.cos(angle + swirl)*speed + random(-0.1,0.1);
+      this.y += Math.sin(angle + swirl)*speed + random(-0.1,0.1);
       this.alpha -= this.decay;
-
-      if(this.alpha <=0){
-        this.reset(false);
-      }
+      if(this.alpha <= 0) this.reset(false);
     }
 
     // Trail speichern
     this.trail.push({x:this.x,y:this.y,alpha:this.alpha});
-    if(this.trail.length>6) this.trail.shift();
+    if(this.trail.length>CONFIG.trailLength) this.trail.shift();
   }
 
   draw(){
-    // Trail für Tunnel/Strudel
     for(let i=0;i<this.trail.length;i++){
       const t = this.trail[i];
       ctx.beginPath();
-      ctx.arc(t.x,t.y,this.radius*(i/6 +0.3),0,Math.PI*2);
-      ctx.fillStyle = this.color + t.alpha*(i/6 +0.3) + ')';
-      ctx.shadowBlur = CONFIG.glowBlur*(i/6 +0.3);
-      ctx.shadowColor = `rgba(255,255,255,${t.alpha*(i/6 +0.3)})`;
+      ctx.arc(t.x,t.y,this.radius*(i/CONFIG.trailLength +0.3),0,Math.PI*2);
+      ctx.fillStyle = this.color + t.alpha*(i/CONFIG.trailLength +0.3) + ')';
+      ctx.shadowBlur = CONFIG.glowBlur*(i/CONFIG.trailLength +0.3);
+      ctx.shadowColor = `rgba(255,255,255,${t.alpha*(i/CONFIG.trailLength +0.3)})`;
       ctx.fill();
     }
-    // Hauptpartikel
+
     ctx.beginPath();
     ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
     ctx.fillStyle = this.color + this.alpha + ')';
@@ -109,6 +105,7 @@ class Particle {
   }
 }
 
+// Init
 let particles = Array.from({length: CONFIG.initialParticleCount}, ()=>new Particle(true));
 let extraParticlesAdded = false;
 let phase = CONFIG.phases.FLOAT;
@@ -123,26 +120,9 @@ function animate(){
   drawBackground();
   particles.forEach(p=>{ p.update(phase); p.draw(); });
 
-  // Alle Partikel hinzufügen nach sanftem Start
+  // Volle Partikel nach sanftem Start
   if(!extraParticlesAdded && timer>200){
     const more = Array.from({length: CONFIG.totalParticleCount - CONFIG.initialParticleCount}, ()=>new Particle());
     particles = particles.concat(more);
     extraParticlesAdded = true;
   }
-
-  timer++;
-  if(timer%3000===0) phase=CONFIG.phases.GATHER;
-  if(timer%3000===1500) phase=CONFIG.phases.EXPLODE;
-  if(timer%3000===2500) phase=CONFIG.phases.FLOAT;
-
-  requestAnimationFrame(animate);
-}
-
-window.addEventListener('resize',()=>{
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-  center.x = width/2;
-  center.y = height/2;
-});
-
-animate();
