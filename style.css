@@ -44,15 +44,17 @@ header p {
 
 .feature {
   background: rgba(20,20,20,0.6);
-  padding: 35px;
+  padding: 50px;
   border-radius: 25px;
   max-width: 320px;
+  min-height: 300px;
   box-shadow:
     0 0 20px rgba(255,127,0,0.9),
     0 0 40px rgba(255,127,0,0.6),
     0 0 60px rgba(255,127,0,0.3);
   border: 2px solid rgba(255,127,0,0.5);
   transition: transform 0.4s ease, box-shadow 0.4s ease;
+  position: relative;
 }
 
 .feature:hover {
@@ -77,7 +79,8 @@ header p {
 }
 
 .cta-button {
-  padding: 20px 40px;
+  display: inline-block;
+  padding: 20px 50px;
   background: #ff7f00;
   color: #fff;
   text-decoration: none;
@@ -86,6 +89,7 @@ header p {
   font-size: 1.2em;
   transition: 0.3s;
   text-shadow: 0 0 10px #ff7f00;
+  margin-bottom: 80px;
 }
 
 .cta-button:hover {
@@ -117,21 +121,21 @@ html, body {
 }
 
 #btc-box {
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 160px;
+  margin-bottom: 150px;
   text-align: center;
 }
 
 #btc-box h2 {
   color: #fff;
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   letter-spacing: 1px;
   margin-bottom: 15px;
   text-shadow: 0 0 15px #F7931A, 0 0 30px rgba(247,147,26,0.6);
 }
 
 #btc-price {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: bold;
   color: #F7931A;
   transition: all 0.4s ease;
