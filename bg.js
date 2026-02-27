@@ -6,15 +6,15 @@ let height = canvas.height = window.innerHeight;
 const center = { x: width/2, y: height/2 };
 
 const CONFIG = {
-  particleCount: 200,
+  particleCount: 150,
   starCount: 6,
-  hues: [210, 240, 270],
+  hues: [210, 240],
   phases: { FLOAT:'float', GATHER:'gather', EXPLODE:'explode' },
 };
 
 const random = (min,max)=>Math.random()*(max-min)+min;
 const randomHue = ()=>CONFIG.hues[Math.floor(random(0,CONFIG.hues.length))];
-const createColor = ()=>`hsla(${randomHue()},${random(50,100)}%,${random(70,100)}%,`;
+const createColor = ()=>`hsla(${randomHue()},${random(30,60)}%,${random(70,90)}%,`;
 
 class Particle {
   constructor(){ this.reset(); }
@@ -23,7 +23,7 @@ class Particle {
     this.y=random(0,height);
     this.vx=random(-0.2,0.2);
     this.vy=random(-0.2,0.2);
-    this.radius=random(1.5,3);
+    this.radius=random(1,3);
     this.alpha=random(0.5,1);
     this.decay=random(0.001,0.003);
     this.color=createColor();
@@ -54,7 +54,7 @@ class Particle {
     ctx.beginPath();
     ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
     ctx.fillStyle=this.color+this.alpha+')';
-    ctx.shadowBlur=15+10*this.alpha;
+    ctx.shadowBlur=10+5*this.alpha;
     ctx.shadowColor=`rgba(255,255,255,${this.alpha})`;
     ctx.fill();
   }
@@ -65,7 +65,7 @@ let phase=CONFIG.phases.FLOAT;
 let timer=0;
 
 const drawBackground=()=>{
-  ctx.fillStyle='#000'; // schwarzer Hintergrund, kein Weiß mehr
+  ctx.fillStyle='#000';
   ctx.fillRect(0,0,width,height);
 };
 
