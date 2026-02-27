@@ -4,48 +4,49 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Crypto Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <canvas id="bgCanvas"></canvas>
 
-<div class="container">
+<header>
+  <h1>Crypto Insights</h1>
+  <p>Stay up-to-date with the latest cryptocurrency trends, news, and market movements. Discover the best coins, learn strategies, and track your portfolio in real-time.</p>
+</header>
 
-  <header>
-    <h1>Crypto Dashboard</h1>
-    <p>Track your favorite cryptocurrencies and stay updated with the latest market trends.</p>
-  </header>
-
-  <div class="features">
-    <div class="feature">
-      <h2>Bitcoin</h2>
-      <p>Latest price and market movements of Bitcoin (BTC).</p>
-      <div id="btc-box">
-        <h2>Current Price</h2>
-        <div id="btc-price">$0.00</div>
-      </div>
-      <a href="#" class="cta-button">Buy BTC</a>
-    </div>
-    <div class="feature">
-      <h2>Ethereum</h2>
-      <p>Check Ethereum prices, news, and network updates.</p>
-      <a href="#" class="cta-button">Buy ETH</a>
-    </div>
-    <div class="feature">
-      <h2>Altcoins</h2>
-      <p>Explore trending altcoins and upcoming crypto projects.</p>
-      <a href="#" class="cta-button">Discover</a>
-    </div>
-  </div>
-
+<div id="btc-box">
+  <h2>Live Bitcoin Price</h2>
+  <div id="btc-price">$0.00</div>
 </div>
+
+<section class="features">
+  <div class="feature">
+    <h2>Bitcoin</h2>
+    <p>Bitcoin is the original cryptocurrency, designed as digital gold and a store of value for the decentralized world.</p>
+  </div>
+  <div class="feature">
+    <h2>Ethereum</h2>
+    <p>Ethereum powers smart contracts and decentralized applications, enabling a new era of programmable finance.</p>
+  </div>
+  <div class="feature">
+    <h2>DeFi & Altcoins</h2>
+    <p>Explore the innovative projects in decentralized finance and alternative coins with high growth potential.</p>
+  </div>
+  <div class="feature">
+    <h2>Crypto News</h2>
+    <p>Get the latest insights, market trends, and breaking news from the world of cryptocurrencies.</p>
+  </div>
+</section>
+
+<a href="#" class="cta-button">Get Started</a>
 
 <footer>
   &copy; 2026 Crypto Dashboard. All rights reserved.
 </footer>
 
 <script src="bg.js"></script>
-<script src="btc.js"></script>
+<script src="btc.js"></script> <!-- optional live Bitcoin price script -->
 </body>
 </html>
