@@ -8,13 +8,12 @@ const center = { x: width/2, y: height/2 };
 const CONFIG = {
   particleCount: 150,
   starCount: 6,
-  hues: [210, 240], // Blau-Töne
+  hues: [210, 240], // Blau-Nuancen
   phases: { FLOAT:'float', GATHER:'gather', EXPLODE:'explode' },
 };
 
 const random = (min,max)=>Math.random()*(max-min)+min;
 const randomHue = ()=>CONFIG.hues[Math.floor(random(0,CONFIG.hues.length))];
-const createColor = ()=>`hsla(${randomHue()},${random(30,60)}%,${random(70,90)}%,`;
 
 class Particle {
   constructor(){ this.reset(); }
@@ -26,7 +25,7 @@ class Particle {
     this.radius=random(1,3);
     this.alpha=random(0.5,1);
     this.decay=random(0.001,0.003);
-    this.color=createColor();
+    this.color=`hsla(${randomHue()},${random(30,60)}%,${random(70,90)}%,`; // Farbe ohne Alpha
   }
   update(phase){
     if(phase===CONFIG.phases.FLOAT){
@@ -47,30 +46,28 @@ class Particle {
       this.x+=Math.cos(angle+swirl)*speed+random(-0.2,0.2);
       this.y+=Math.sin(angle+swirl)*speed+random(-0.2,0.2);
       this.alpha-=this.decay*1.5;
-      if(this.alpha<=0)this.reset();
+      if(this.alpha<=0) this.reset();
     }
   }
   draw(){
     ctx.beginPath();
     ctx.arc(this.x,this.y,this.radius,0,Math.PI*2);
-    ctx.fillStyle=this.color+this.alpha+')';
-    ctx.shadowBlur=10+5*this.alpha;
-    ctx.shadowColor=`rgba(255,255,255,${this.alpha})`;
+    ctx.fillStyle = `${this.color}${this.alpha})`; // korrekt zusammengesetzt
+    ctx.shadowBlur = 10 + 5*this.alpha;
+    ctx.shadowColor = `rgba(255,255,255,${this.alpha})`;
     ctx.fill();
   }
 }
 
-const particles=Array.from({length:CONFIG.particleCount},()=>new Particle());
-let phase=CONFIG.phases.FLOAT;
-let timer=0;
+const particles = Array.from({length:CONFIG.particleCount},()=>new Particle());
+let phase = CONFIG.phases.FLOAT;
+let timer = 0;
 
-// Hintergrund transparent lassen
-const drawBackground=()=>{
-  ctx.clearRect(0,0,width,height);
+const drawBackground = () => {
+  ctx.clearRect(0,0,width,height); // kein weiß mehr
 };
 
-// Sterne
-const drawStars=()=>{
+const drawStars = () => {
   for(let i=0;i<CONFIG.starCount;i++){
     ctx.beginPath();
     const sx=random(0,width);
@@ -78,7 +75,7 @@ const drawStars=()=>{
     const sr=random(0.3,1.2);
     const sa=random(0.2,0.5);
     ctx.arc(sx,sy,sr,0,Math.PI*2);
-    ctx.fillStyle=`rgba(255,255,255,${sa})`;
+    ctx.fillStyle = `rgba(255,255,255,${sa})`;
     ctx.fill();
   }
 };
@@ -88,9 +85,9 @@ function animate(){
   drawStars();
   particles.forEach(p=>{p.update(phase); p.draw();});
   timer++;
-  if(timer%1500===0)phase=CONFIG.phases.GATHER;
-  if(timer%1500===500)phase=CONFIG.phases.EXPLODE;
-  if(timer%1500===1000)phase=CONFIG.phases.FLOAT;
+  if(timer%1500===0) phase=CONFIG.phases.GATHER;
+  if(timer%1500===500) phase=CONFIG.phases.EXPLODE;
+  if(timer%1500===1000) phase=CONFIG.phases.FLOAT;
   requestAnimationFrame(animate);
 }
 
