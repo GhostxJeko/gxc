@@ -135,4 +135,4 @@ center.y = height / 2;
 });
 
 // START
-animate();  
+animate();
