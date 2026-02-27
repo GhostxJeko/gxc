@@ -1,198 +1,160 @@
-const canvas = document.getElementById('bgCanvas');
-const ctx = canvas.getContext('2d');
+// bg.js – Kosmisches Universum mit Lichtball, Explosion & Strudel (optimiert)
+const canvas = document.getElementById("bgCanvas");
+const ctx = canvas.getContext("2d");
 
 let width = canvas.width = window.innerWidth;
 let height = canvas.height = window.innerHeight;
+let centerX = width / 2;
+let centerY = height / 2;
 
-const center = { x: width / 2, y: height / 2 };
-
-const CONFIG = {
-  particleCount: 210,
-  starCount: 40,
-  layers: 3,
-  mouseInfluence: 0.0006,
-  phases: { FLOAT: 'float', GATHER: 'gather', EXPLODE: 'explode' }
-};
-
-const random = (min, max) => Math.random() * (max - min) + min;
-
-/* ===== NUR 2 FARBEN ===== */
-function getColor() {
-  return Math.random() > 0.5
-    ? 'rgba(0,170,255,'   // Neon Blau
-    : 'rgba(255,255,255,'; // Weiß
-}
-
-/* ===== STERNE EINMAL GENERIEREN ===== */
-const stars = [];
-for (let i = 0; i < CONFIG.starCount; i++) {
-  stars.push({
-    x: random(0, width),
-    y: random(0, height),
-    r: random(0.2, 1.2),
-    alpha: random(0.2, 0.6),
-    speed: random(0.001, 0.004)
-  });
-}
-
-/* ===== PARTICLE CLASS ===== */
-class Particle {
-  constructor(layer) {
-    this.layer = layer;
-    this.reset();
-  }
-
-  reset() {
-    this.x = random(0, width);
-    this.y = random(0, height);
-
-    this.vx = random(-0.15, 0.15) / this.layer;
-    this.vy = random(-0.15, 0.15) / this.layer;
-
-    this.radius = random(1.2, 2.4) * (1 / this.layer + 0.5);
-    this.alpha = random(0.6, 1);
-    this.decay = random(0.001, 0.002);
-    this.color = getColor();
-    this.explosionSpeed = random(1.2, 2);
-  }
-
-  update(phase, mouse) {
-
-    if (mouse) {
-      this.vx += (mouse.x - this.x) * CONFIG.mouseInfluence;
-      this.vy += (mouse.y - this.y) * CONFIG.mouseInfluence;
-    }
-
-    if (phase === CONFIG.phases.FLOAT) {
-      this.x += this.vx;
-      this.y += this.vy;
-
-      if (this.x < 0 || this.x > width) this.vx *= -1;
-      if (this.y < 0 || this.y > height) this.vy *= -1;
-    }
-
-    else if (phase === CONFIG.phases.GATHER) {
-      this.x += (center.x - this.x) * 0.015;
-      this.y += (center.y - this.y) * 0.015;
-    }
-
-    else if (phase === CONFIG.phases.EXPLODE) {
-      const angle = Math.atan2(this.y - center.y, this.x - center.x);
-      const swirl = 0.03;
-
-      this.x += Math.cos(angle + swirl) * this.explosionSpeed;
-      this.y += Math.sin(angle + swirl) * this.explosionSpeed;
-
-      this.alpha -= this.decay;
-
-      if (this.alpha <= 0) {
-        this.reset();
-      }
-    }
-  }
-
-  draw() {
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-
-    ctx.fillStyle = this.color + this.alpha + ')';
-    ctx.shadowBlur = 20;
-    ctx.shadowColor = this.color + '0.8)';
-    ctx.fill();
-  }
-}
-
-/* ===== PARTICLES ERZEUGEN ===== */
+// Partikel-Einstellungen
 const particles = [];
-for (let l = 1; l <= CONFIG.layers; l++) {
-  for (let i = 0; i < CONFIG.particleCount / CONFIG.layers; i++) {
-    particles.push(new Particle(l));
-  }
+const START_COUNT = 40;   // Anfangspartikel für Performance
+const MAX_COUNT = 120;    // Maximal im Strudel
+const hueOptions = [210, 220, 230, 240]; // Weiß-Blau-Töne
+
+function rand(min, max) { return Math.random() * (max - min) + min; }
+
+// Partikel erstellen
+function createParticles() {
+    particles.length = 0;
+    for (let i = 0; i < MAX_COUNT; i++) {
+        const hue = hueOptions[Math.floor(rand(0, hueOptions.length))];
+        particles.push({
+            x: rand(0, width),
+            y: rand(0, height),
+            vx: rand(-0.15, 0.15),
+            vy: rand(-0.15, 0.15),
+            radius: rand(1.2, 2.4),
+            alpha: i < START_COUNT ? rand(0.6, 1) : 0,
+            active: i < START_COUNT,
+            hue: hue,
+            exploded: false
+        });
+    }
 }
 
-let phase = CONFIG.phases.FLOAT;
+let phase = "float";
 let timer = 0;
 
-const mouse = { x: null, y: null };
+// Canvas Resize
+function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    centerX = width / 2;
+    centerY = height / 2;
+}
 
-window.addEventListener('mousemove', e => {
-  mouse.x = e.clientX;
-  mouse.y = e.clientY;
-});
+window.addEventListener("resize", resize);
 
-/* ===== BACKGROUND ===== */
+// Hintergrund zeichnen
 function drawBackground() {
-  const gradient = ctx.createLinearGradient(0, 0, 0, height);
-  gradient.addColorStop(0, '#000000');
-  gradient.addColorStop(1, '#050510');
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, width, height);
 }
 
-/* ===== STERNE ===== */
-function drawStars() {
-  for (let s of stars) {
-    s.alpha += s.speed;
-    if (s.alpha >= 0.6 || s.alpha <= 0.2) {
-      s.speed *= -1;
-    }
+// Partikel zeichnen & bewegen
+function drawParticles() {
+    drawBackground();
 
-    ctx.beginPath();
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
-    ctx.fill();
-  }
-}
+    particles.forEach(p => {
+        if (!p.active) return;
 
-/* ===== VERBINDUNGEN ===== */
-function drawConnections() {
-  for (let i = 0; i < particles.length; i++) {
-    for (let j = i + 1; j < particles.length; j++) {
-      const dx = particles[i].x - particles[j].x;
-      const dy = particles[i].y - particles[j].y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      if (dist < 100) {
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(0,170,255,${1 - dist / 100})`;
-        ctx.lineWidth = 0.3;
-        ctx.moveTo(particles[i].x, particles[i].y);
-        ctx.lineTo(particles[j].x, particles[j].y);
-        ctx.stroke();
-      }
-    }
-  }
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `hsla(${p.hue}, 90%, 75%, ${p.alpha})`;
+        ctx.shadowBlur = 10 + 5 * p.alpha; // Performance angepasst
+        ctx.shadowColor = `hsla(${p.hue}, 90%, 75%, ${p.alpha})`;
+        ctx.fill();
+
+        // Float-Phase
+        if (phase === "float") {
+            p.x += p.vx;
+            p.y += p.vy;
+            if (p.x < 0 || p.x > width) p.vx *= -1;
+            if (p.y < 0 || p.y > height) p.vy *= -1;
+        }
+
+        // Zur Mitte ziehen
+        else if (phase === "gather") {
+            p.x += (centerX - p.x) * 0.08;
+            p.y += (centerY - p.y) * 0.08;
+        }
+
+        // Lichtball-Explosion
+        else if (phase === "explode") {
+            if (!p.exploded) {
+                const angle = rand(0, Math.PI * 2);
+                const speed = rand(2.5, 5); // flüssig aber sichtbar
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed;
+                p.exploded = true;
+            }
+            p.x += p.vx;
+            p.y += p.vy;
+            p.alpha -= 0.004;
+
+            if (p.alpha <= 0) {
+                p.x = centerX;
+                p.y = centerY;
+                p.alpha = rand(0.6, 1);
+                p.exploded = false;
+            }
+        }
+
+        // Strudel-Phase
+        else if (phase === "swirl") {
+            const dx = p.x - centerX;
+            const dy = p.y - centerY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            let angle = Math.atan2(dy, dx) + 0.05; // Drehung
+            let radius = dist * 0.97;             // leicht einsaugen
+            p.x = centerX + Math.cos(angle) * radius;
+            p.y = centerY + Math.sin(angle) * radius;
+
+            p.x += (Math.random() - 0.5) * 1.2;
+            p.y += (Math.random() - 0.5) * 1.2;
+
+            p.alpha -= 0.002;
+            if (p.alpha <= 0) {
+                p.x = centerX;
+                p.y = centerY;
+                p.alpha = rand(0.6, 1);
+            }
+        }
+    });
 }
 
-/* ===== ANIMATION LOOP ===== */
+// Mehr Partikel aktivieren
+function activateMoreParticles() {
+    particles.forEach(p => {
+        if (!p.active) {
+            p.active = true;
+            p.x = centerX;
+            p.y = centerY;
+            p.alpha = rand(0.6, 1);
+        }
+    });
+}
+
+// Animation Loop
 function animate() {
+    drawParticles();
+    requestAnimationFrame(animate);
 
-  drawBackground();
-  drawStars();
-
-  for (let p of particles) {
-    p.update(phase, mouse.x !== null ? mouse : null);
-    p.draw();
-  }
-
-  drawConnections();
-
-  timer++;
-
-  if (timer % 2000 === 0) phase = CONFIG.phases.GATHER;
-  if (timer % 2000 === 800) phase = CONFIG.phases.EXPLODE;
-  if (timer % 2000 === 1400) phase = CONFIG.phases.FLOAT;
-
-  requestAnimationFrame(animate);
+    timer++;
+    if (timer === 400) phase = "gather";       // Partikel zur Mitte
+    if (timer === 650) phase = "explode";      // Lichtball explodiert
+    if (timer === 950) {                       // Strudel
+        activateMoreParticles();
+        phase = "swirl";
+    }
+    if (timer === 1500) {                      // Reset auf float
+        phase = "float";
+        timer = 0;
+    }
 }
 
-/* ===== RESIZE ===== */
-window.addEventListener('resize', () => {
-  width = canvas.width = window.innerWidth;
-  height = canvas.height = window.innerHeight;
-  center.x = width / 2;
-  center.y = height / 2;
-});
-
-animate();  
+// Start
+createParticles();
+animate();
