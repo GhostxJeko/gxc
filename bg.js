@@ -126,4 +126,4 @@ window.addEventListener('resize', () => {
 });
 
 // START
-animate();
+animate();  
