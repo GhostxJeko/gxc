@@ -1,15 +1,15 @@
-/* Grundlegendes */
+/* Basic Reset */
 body, html {
   margin: 0;
   padding: 0;
   height: 100%;
   font-family: 'Orbitron', sans-serif;
   overflow-x: hidden;
-  background: #000; /* schwarzer Hintergrund für bessere Partikel */
+  background: #000;
   color: #fff;
 }
 
-/* Container über Canvas */
+/* Container */
 .container {
   position: relative;
   z-index: 2;
@@ -17,7 +17,7 @@ body, html {
   padding: 50px 20px;
   max-width: 1200px;
   margin: 0 auto;
-  min-height: 200vh; /* scrollbare Seite */
+  min-height: 200vh;
 }
 
 /* Header */
@@ -37,7 +37,28 @@ header p {
   text-shadow: 0 0 6px rgba(255,160,77,0.6);
 }
 
-/* Feature-Boxen */
+/* Bitcoin Box */
+#btc-box {
+  margin: 50px 0;
+  text-align: center;
+}
+
+#btc-box h2 {
+  font-size: 2.2rem;
+  color: #fff;
+  text-shadow: 0 0 15px #F7931A, 0 0 30px rgba(247,147,26,0.6);
+  margin-bottom: 20px;
+}
+
+#btc-price {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #F7931A;
+  text-shadow: 0 0 20px #F7931A, 0 0 40px rgba(247,147,26,0.5);
+  transition: all 0.4s ease;
+}
+
+/* Features */
 .features {
   display: flex;
   flex-wrap: wrap;
@@ -81,7 +102,7 @@ header p {
   text-shadow: 0 0 6px rgba(255,160,77,0.6);
 }
 
-/* Call to Action */
+/* CTA Button */
 .cta-button {
   padding: 20px 45px;
   background: #ff7f00;
