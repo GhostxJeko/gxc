@@ -1,3 +1,4 @@
+
 // bg.js – Schwarzes/blaues Universum mit weißen/blauen Partikeln, Lichtball, Explosion & Strudel
 const canvas = document.getElementById("bgCanvas");
 const ctx = canvas.getContext("2d");
