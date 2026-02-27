@@ -5,7 +5,7 @@ body, html {
   height: 100%;
   font-family: 'Orbitron', sans-serif;
   overflow-x: hidden;
-  background: transparent; /* Canvas sichtbar */
+  background: transparent; /* Canvas sichtbar machen */
   color: #fff;
 }
 
@@ -36,7 +36,7 @@ header p {
   text-shadow: 0 0 6px rgba(255,160,77,0.6);
 }
 
-/* ================== Feature-Boxen Neon High-End ================== */
+/* Feature-Boxen Neon High-End */
 .features {
   display: flex;
   flex-wrap: wrap;
@@ -46,7 +46,7 @@ header p {
 }
 
 .feature {
-  background: rgba(20, 20, 20, 0.6); /* leicht transparent */
+  background: rgba(20, 20, 20, 0.6);
   padding: 30px;
   border-radius: 25px;
   width: 280px; /* kleinere Boxen */
